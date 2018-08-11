@@ -1,0 +1,61 @@
+/*
+ * Copyright (C) 2011-2018 Intel Corporation. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in
+ *     the documentation and/or other materials provided with the
+ *     distribution.
+ *   * Neither the name of Intel Corporation nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+
+enclave {
+include "sgx_report.h"
+include "sgx_quote.h"
+    trusted {
+        public uint32_t asve_verify_quote([out] uint32_t *p_is_valid,
+                                        [size = cert_size, in] const uint8_t *p_grp_verif_cert,
+                                        uint32_t cert_size,
+                                        [size = ias_res_size, in] uint8_t *p_ias_res,
+                                        uint32_t ias_res_size,
+                                        [size = ias_sig_size, in] uint8_t *p_ias_sig,
+                                        uint32_t ias_sig_size,
+                                        [size = ias_crt_size, in] uint8_t *p_ias_crt,
+                                        uint32_t ias_crt_size,
+                                        [in] sgx_target_info_t *p_asie_target_info,
+                                        [in] sgx_target_info_t *p_isve_target_info,
+                                        [size = ts_size, in] const uint8_t *p_curr_ts,
+                                        uint32_t ts_size,
+                                        [user_check] const uint8_t *p_priv_rl,
+                                        uint32_t priv_rl_size,
+                                        [user_check] const uint8_t *p_sig_rl, // SigRL is relatively big, so we cannot copy it into EPC
+                                        uint32_t sig_rl_size,
+    									[user_check] const uint8_t *p_quote, // Quote is also big, we should output it in piece meal.
+                                        uint32_t quote_size);
+    };
+
+    untrusted {
+        void ocall_print_string([in, string] const char *str);
+    };
+};
