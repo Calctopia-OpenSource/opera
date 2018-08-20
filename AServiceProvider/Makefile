@@ -74,8 +74,8 @@ else
 	Urts_Library_Name := sgx_urts
 endif
 
-App_Cpp_Files := App/App.cpp $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp) WebService/WebService.cpp $(wildcard Util/*.cpp) 
-App_Include_Paths := -IInclude -IApp -I$(SGX_SDK)/include
+App_Cpp_Files := App/App.cpp $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp) ../WebService/WebService.cpp $(wildcard ../Util/*.cpp) 
+App_Include_Paths := -IInclude -IApp -I$(SGX_SDK)/include -I../Util
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -164,7 +164,7 @@ endif
 .PHONY: all run
 
 ifeq ($(Build_Mode), HW_RELEASE)
-all: $(App_Name) $(Enclave_Name)
+all: $(App_Name) #$(Enclave_Name)
 	@echo "The project has been built in release hardware mode."
 	@echo "Please sign the $(Enclave_Name) first with your signing key before you run the $(App_Name) to launch and access the enclave."
 	@echo "To sign the enclave use the command:"
@@ -172,7 +172,7 @@ all: $(App_Name) $(Enclave_Name)
 	@echo "You can also sign the enclave using an external signing tool."
 	@echo "To build the project in simulation mode set SGX_MODE=SIM. To build the project in prerelease mode set SGX_PRERELEASE=1 and SGX_MODE=HW."
 else
-all: $(App_Name) $(Signed_Enclave_Name)
+all: $(App_Name) #$(Signed_Enclave_Name)
 ifeq ($(Build_Mode), HW_DEBUG)
 	@echo "The project has been built in debug hardware mode."
 else ifeq ($(Build_Mode), SIM_DEBUG)
@@ -192,47 +192,31 @@ ifneq ($(Build_Mode), HW_RELEASE)
 	@echo "RUN  =>  $(App_Name) [$(SGX_MODE)|$(SGX_ARCH), OK]"
 endif
 
+LIBSGX_AS := ../libsgx_as
+
 ######## App Objects ########
 
-App/Enclave_u.c: $(SGX_EDGER8R) Enclave/Enclave.edl
-	@cd App && $(SGX_EDGER8R) --untrusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
-	@echo "GEN  =>  $@"
+# App/Enclave_u.c: $(SGX_EDGER8R) Enclave/Enclave.edl
+# 	@cd App && $(SGX_EDGER8R) --untrusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
+# 	@echo "GEN  =>  $@"
 
-App/Enclave_u.o: App/Enclave_u.c
+# App/Enclave_u.o: App/Enclave_u.c
+# 	@$(CC) $(App_C_Flags) -c $< -o $@
+# 	@echo "CC   <=  $<"
+
+$(LIBSGX_AS)/asie/asie_u.c: $(LIBSGX_AS)/asie/asie.cpp
+	cd $(LIBSGX_AS)/asie && $(MAKE) all
+	@$(SGX_ENCLAVE_SIGNER) sign -key $(LIBSGX_AS)/as_private.pem -enclave $(LIBSGX_AS)/asie/asie.so -out asie.signed.so -config $(LIBSGX_AS)/asie/config.xml
+
+App/asie_u.o: $(LIBSGX_AS)/asie/asie_u.c
 	@$(CC) $(App_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-libsgx_as/asie/asie_u.c: libsgx_as/asie/asie.cpp
-	cd libsgx_as/asie && $(MAKE) all
-	@$(SGX_ENCLAVE_SIGNER) sign -key libsgx_as/as_private.pem -enclave libsgx_as/asie/asie.so -out asie.signed.so -config libsgx_as/asie/config.xml
-
-libsgx_as/asae/asae_u.c: libsgx_as/asae/asae.cpp
-	cd libsgx_as/asae && $(MAKE) all
-	@$(SGX_ENCLAVE_SIGNER) sign -key libsgx_as/as_private.pem -enclave libsgx_as/asae/asae.so -out asae.signed.so -config libsgx_as/asae/config.xml
-
-# used for isv client to verify as_quote
-libsgx_as/asve/asve_u.c: libsgx_as/asve/asve.cpp
-	cd libsgx_as/asve && $(MAKE) all
-	@$(SGX_ENCLAVE_SIGNER) sign -key Enclave/Enclave_private.pem -enclave libsgx_as/asve/asve.so -out asve.signed.so -config libsgx_as/asve/config.xml
-
-
-App/asie_u.o: libsgx_as/asie/asie_u.c
-	@$(CC) $(App_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
-
-App/asae_u.o: libsgx_as/asae/asae_u.c
-	@$(CC) $(App_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
-
-App/asve_u.o: libsgx_as/asve/asve_u.c
-	@$(CC) $(App_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
-
-WebService/WebService.o: WebService/WebService.cpp
+../WebService/WebService.o: ../WebService/WebService.cpp
 	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-Util/%.o: Util/%.cpp
+../Util/%.o: ../Util/%.cpp
 	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
@@ -240,37 +224,35 @@ App/%.o: App/%.cpp
 	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(App_Name): App/Enclave_u.o App/asie_u.o App/asae_u.o App/asve_u.o $(App_Cpp_Objects)
+$(App_Name): App/asie_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
 
 ######## Enclave Objects ########
 
-Enclave/Enclave_t.c: $(SGX_EDGER8R) Enclave/Enclave.edl
-	@cd Enclave && $(SGX_EDGER8R) --trusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
-	@echo "GEN  =>  $@"
+# Enclave/Enclave_t.c: $(SGX_EDGER8R) Enclave/Enclave.edl
+# 	@cd Enclave && $(SGX_EDGER8R) --trusted ../Enclave/Enclave.edl --search-path ../Enclave --search-path $(SGX_SDK)/include
+# 	@echo "GEN  =>  $@"
 
-Enclave/Enclave_t.o: Enclave/Enclave_t.c
-	@$(CC) $(Enclave_C_Flags) -c $< -o $@
-	@echo "CC   <=  $<"
+# Enclave/Enclave_t.o: Enclave/Enclave_t.c
+# 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
+# 	@echo "CC   <=  $<"
 
-Enclave/%.o: Enclave/%.cpp
-	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
-	@echo "CXX  <=  $<"
+# Enclave/%.o: Enclave/%.cpp
+# 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
+# 	@echo "CXX  <=  $<"
 
-$(Enclave_Name): Enclave/Enclave_t.o $(Enclave_Cpp_Objects)
-	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
-	@echo "LINK =>  $@"
+# $(Enclave_Name): Enclave/Enclave_t.o $(Enclave_Cpp_Objects)
+# 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
+# 	@echo "LINK =>  $@"
 
-$(Signed_Enclave_Name): $(Enclave_Name)
-	@$(SGX_ENCLAVE_SIGNER) sign -key Enclave/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
-	@echo "SIGN =>  $@"
+# $(Signed_Enclave_Name): $(Enclave_Name)
+# 	@$(SGX_ENCLAVE_SIGNER) sign -key Enclave/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
+# 	@echo "SIGN =>  $@"
 
 .PHONY: clean
 
 clean:
 	@rm -f $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.* *.so App/*.o
-	cd libsgx_as/asie && $(MAKE) clean
-	cd libsgx_as/asae && $(MAKE) clean
-	cd libsgx_as/asve && $(MAKE) clean
+	cd $(LIBSGX_AS)/asie && $(MAKE) clean

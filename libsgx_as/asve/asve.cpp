@@ -94,6 +94,8 @@ void printf(const char *fmt, ...)
     break;                       \
   }
 
+VerifierCtx* g_verifier = NULL;
+
 uint32_t asve_verify_quote(
     uint32_t *p_is_valid,
     const uint8_t *p_grp_verif_cert,
@@ -110,14 +112,15 @@ uint32_t asve_verify_quote(
     uint32_t ts_size,
     const uint8_t *p_priv_rl,
     uint32_t priv_rl_size,
-    const uint8_t *p_sig_rl, // SigRL is relatively big, so we cannot copy it into EPC
+    const uint8_t *p_sig_rl,
     uint32_t sig_rl_size,
-    const uint8_t *p_quote, // Quote is also big, we should output it in piece meal.
+    const uint8_t *p_quote,
     uint32_t quote_size)
 {
     EpidStatus res = kEpidErr;
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
 
+    // VerifierCtx* verifier = NULL;
     do {
         // check group verification cert
         if (!p_grp_verif_cert || cert_size != sizeof(GroupVerifCert) ||
@@ -130,6 +133,11 @@ uint32_t asve_verify_quote(
                                 p_ias_crt, ias_crt_size) ||
             !is_pse_status_ok(p_ias_res)) 
         {
+            // if (!verify_ias_report( const_cast<uint8_t*>(p_grp_verif_cert),
+            //                     cert_size,
+            //                     p_ias_res, ias_res_size,
+            //                     p_ias_sig, ias_sig_size,
+            //                     p_ias_crt, ias_crt_size)) printf("<<<<verif error>>>\n");
             break;
         }
         GroupVerifCert *grp_verif_cert =
@@ -154,7 +162,7 @@ uint32_t asve_verify_quote(
         // (!p_sig_rl && sig_rl_size > 0) ||
         // (p_sig_rl && sig_rl_size < sizeof(SigRl) - sizeof(SigRlEntry)) ||
         !p_quote || quote_size < sizeof(ASQuote) + sizeof(EpidSignature) - sizeof(NrProof)) {
-            printf("kEpidBadArgErr min\n");
+            printf("input < min size\n");
             res = kEpidBadArgErr;
             break;
         }
@@ -169,7 +177,11 @@ uint32_t asve_verify_quote(
             sig_rl_size != GetSigRlSize(sig_rl) ||
             quote_size != GetASQuoteSize(as_quote) ||
             as_quote->signature_len != GetEpidSigSize(sig)) {
-            printf("kEpidBadArgErr\n");
+            printf("input size errors\n");
+            printf("priv_rl_size: %d %d\n", priv_rl_size, GetPrivRlSize(priv_rl));
+            printf("sig_rl_size: %d %d\n", sig_rl_size, GetSigRlSize(sig_rl));
+            printf("quote_size: %d %d\n", quote_size, GetASQuoteSize(as_quote));
+            printf("signature_len: %d %d\n", as_quote->signature_len, GetEpidSigSize(sig));
             res = kEpidBadArgErr;
             break;
         }
@@ -188,6 +200,7 @@ uint32_t asve_verify_quote(
         if (0 != memcmp(priv_rl_hash, grp_verif_cert->priv_rl_hash, sizeof(sgx_sha256_hash_t)) ||
             0 != memcmp(sig_rl_hash, grp_verif_cert->sig_rl_hash, sizeof(sgx_sha256_hash_t)))
         {
+            printf("rl hash\n");
             res = kEpidBadArgErr;
             break;
         }
@@ -199,6 +212,8 @@ uint32_t asve_verify_quote(
             0 != memcmp(p_curr_ts, grp_verif_cert->asie_ts, AS_TS_SIZE) ||
             0 != memcmp(p_curr_ts, as_quote->asae_ts, AS_TS_SIZE))
         {
+            printf("ts error\n");
+            // printf("<%s>\n<%s>\n<%s>\n", tmp_ts, grp_verif_cert->asie_ts, as_quote->asae_ts);
             res = kEpidBadArgErr;
             break;
         }
@@ -208,21 +223,25 @@ uint32_t asve_verify_quote(
             break;
         }
 
-        VerifierCtx* verifier = NULL;
-        res = EpidVerifierCreate(reinterpret_cast<GroupPubKey const*>(p_grp_verif_cert),
-                                NULL, &verifier);
-        BREAK_ON_EPID_ERROR(res);
-
-        if (priv_rl) {
-            res = EpidVerifierSetPrivRl(verifier, priv_rl, priv_rl_size);
+        // if (g_verifier == NULL) 
+        // {
+            res = EpidVerifierCreate(reinterpret_cast<GroupPubKey const*>(p_grp_verif_cert),
+                                    NULL, &g_verifier);
+            // printf("verifier created\n");
             BREAK_ON_EPID_ERROR(res);
-        }
-        if (sig_rl) {
-            res = EpidVerifierSetSigRl(verifier, sig_rl, sig_rl_size);
-            BREAK_ON_EPID_ERROR(res);
-        }
+            if (priv_rl) {
+                res = EpidVerifierSetPrivRl(g_verifier, priv_rl, priv_rl_size);
+                BREAK_ON_EPID_ERROR(res);
+            }
+            if (sig_rl) {
+                res = EpidVerifierSetSigRl(g_verifier, sig_rl, sig_rl_size);
+                BREAK_ON_EPID_ERROR(res);
+            }
 
-        res = EpidVerify(verifier, sig, as_quote->signature_len, as_quote, sizeof(ASQuote));
+        // }
+
+
+        res = EpidVerify(g_verifier, sig, as_quote->signature_len, as_quote, sizeof(ASQuote));
         // PRINT_ON_EPID_ERROR(res) 
         BREAK_ON_EPID_ERROR(res);
         if (res != kEpidSigValid) {
@@ -242,6 +261,7 @@ uint32_t asve_verify_quote(
         *p_is_valid = true;
         res = kEpidNoErr;
     } while(0);
+    EpidVerifierDelete(&g_verifier);
     PRINT_ON_EPID_ERROR(res)
     return res != kEpidNoErr;
 }

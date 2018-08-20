@@ -415,6 +415,7 @@ bool verify_ias_report(
             p_ias_sig, ias_sig_size,
             p_ias_crt, ias_crt_size))
     {
+        // printf("not valid!");
         return false;
     }
 
@@ -430,6 +431,15 @@ bool verify_ias_report(
                          reinterpret_cast<uint8_t (*)[32]>(&report_data))) {
         return false;
     }
+
+    // for (uint32_t i = 0; i < msg_size; i++) {
+    //     printf("%02x ", p_msg[i]);
+    // }
+    // printf("\n");
+
+    // for (uint32_t i = 0; i < 32; i++) {
+    //     printf("%02x %02x\n", report_data.d[i], quote.report_body.report_data.d[i]);
+    // }
 
     return 0 == memcmp(&report_data, &quote.report_body.report_data, 32);
 }

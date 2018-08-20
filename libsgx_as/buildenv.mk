@@ -29,7 +29,7 @@
 #
 #
 
-
+# ROOT_DIR: linux-sgx sdk source code folder 
 ROOT_DIR              := /home/donnod/Research/SGX/linux-sgx
 COMMON_DIR            := $(ROOT_DIR)/common
 LINUX_EXTERNAL_DIR    := $(ROOT_DIR)/external

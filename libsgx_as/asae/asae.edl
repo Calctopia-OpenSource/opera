@@ -66,12 +66,12 @@ enclave {
                                     uint32_t ias_crt_size);
 
         public uint32_t asae_calc_quote_size([out] size_t *p_quote_size,
-                                    [user_check] const uint8_t *p_sig_rl, // SigRL is relatively big, so we cannot copy it into EPC
+                                    [size = sig_rl_size, in] const uint8_t *p_sig_rl,
                                     uint32_t sig_rl_size);
         public uint32_t asae_get_quote([in] const sgx_report_t *p_report,
-        							[user_check] const uint8_t *p_sig_rl, // SigRL is relatively big, so we cannot copy it into EPC
+        							[size = sig_rl_size, in] const uint8_t *p_sig_rl,
                                     uint32_t sig_rl_size,
-									[user_check] uint8_t *p_quote, // Quote is also big, we should output it in piece meal.
+									[size = quote_size, out] uint8_t *p_quote,
                                     uint32_t quote_size);
     };
 

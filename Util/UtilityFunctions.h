@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <fstream>
 #include <vector>
+#include <time.h>
 // #include <jsoncpp/json/json.h>
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
@@ -59,6 +60,8 @@ int RemoveFile(string filePath);
 string Base64encode(const string val);
 string Base64decode(const string val);
 string Base64encodeUint8(uint8_t *val, uint32_t len);
+
+void GetCurrentTimeGMTTime(char *ts, uint32_t len);
 
 #endif
 

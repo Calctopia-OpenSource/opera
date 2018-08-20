@@ -47,11 +47,11 @@ include "sgx_quote.h"
                                         [in] sgx_target_info_t *p_isve_target_info,
                                         [size = ts_size, in] const uint8_t *p_curr_ts,
                                         uint32_t ts_size,
-                                        [user_check] const uint8_t *p_priv_rl,
+                                        [size = priv_rl_size, in] const uint8_t *p_priv_rl,
                                         uint32_t priv_rl_size,
-                                        [user_check] const uint8_t *p_sig_rl, // SigRL is relatively big, so we cannot copy it into EPC
+                                        [size = sig_rl_size, in] const uint8_t *p_sig_rl,
                                         uint32_t sig_rl_size,
-    									[user_check] const uint8_t *p_quote, // Quote is also big, we should output it in piece meal.
+    									[size = quote_size, in] const uint8_t *p_quote,
                                         uint32_t quote_size);
     };
 

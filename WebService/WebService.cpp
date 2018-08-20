@@ -239,7 +239,7 @@ bool WebService::verifyQuote(uint8_t *quote, uint8_t *pseManifest, uint8_t *nonc
 
 
     if (response_header.response_status == 200) {
-        printf("Quote attestation successful, new report has been created\n");
+        // printf("Quote attestation successful, new report has been created\n");
 
         string response(ias_response_container.p_response);
         // printf("IAS response {%s}", response.c_str());

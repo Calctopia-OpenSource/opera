@@ -377,6 +377,7 @@ uint32_t asae_get_quote(
     // UNUSED(p_quote);
     // UNUSED(quote_size);
 	EpidStatus res = kEpidNoErr;
+    uint8_t *tmp_as_quote = NULL;
     do {
         if (!p_report || SGX_SUCCESS != sgx_verify_report(p_report) ||
         (!p_sig_rl && sig_rl_size > 0) ||
@@ -401,7 +402,7 @@ uint32_t asae_get_quote(
             res = kEpidBadArgErr;
             break;            
         }
-        uint8_t *tmp_as_quote = (uint8_t *) malloc(sig_len + sizeof(ASQuote));
+        tmp_as_quote = (uint8_t *) malloc(sig_len + sizeof(ASQuote));
         if (!tmp_as_quote) {
             res = kEpidMemAllocErr;
             break;
@@ -425,7 +426,7 @@ uint32_t asae_get_quote(
         res = EpidSign(g_member, as_quote, sizeof(ASQuote), basename, basename_size, sig_rl, sig_rl_size, reinterpret_cast<EpidSignature *>(as_quote->signature), sig_len);
         BREAK_ON_EPID_ERROR(res);
 
-        memcpy(p_quote, as_quote, sig_len + sizeof(ASQuote));
+        memcpy(p_quote, as_quote, quote_size);
 
         // VerifierCtx* verifier = NULL;
         // res = EpidVerifierCreate(&g_pub_key, NULL, &verifier);
@@ -436,5 +437,6 @@ uint32_t asae_get_quote(
 
     } while(0);
     PRINT_ON_EPID_ERROR(res)
+    free(tmp_as_quote);
     return res != kEpidNoErr;
 }

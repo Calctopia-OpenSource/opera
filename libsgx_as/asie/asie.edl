@@ -44,10 +44,7 @@ enclave {
                                             [size = sig_rl_size, in] const uint8_t *p_sig_rl,
                                             size_t sig_rl_size);
         public uint32_t asie_delete_issuer([size = sealed_blob_size, in] const uint8_t *p_sealed_blob,
-                                    uint32_t sealed_blob_size);
-        //public uint32_t asie_gen_grp_verif_cert(
-        //                            [size = grp_verif_cert_size, out] uint8_t *p_grp_verif_cert,
-        //                            uint32_t grp_verif_cert_size);
+                                            uint32_t sealed_blob_size);
         public uint32_t asie_request_grp_verif_cert(
                                     [size = ts_size, in] const uint8_t *p_curr_ts,
                                     uint32_t ts_size,
@@ -70,12 +67,6 @@ enclave {
                                             size_t priv_rl_size,
                                             [size = sig_rl_size, out] uint8_t *p_sig_rl,
                                             size_t sig_rl_size);
-        //public uint32_t asie_update_grp_verif_cert(
-        //                            [size = ts_size, in] const uint8_t *p_curr_ts,
-        //                            uint32_t ts_size,
-        //                            [in] sgx_target_info_t *p_qe_target_info,
-        //                            [size = grp_verif_cert_size, out] uint8_t *p_grp_verif_cert,
-        //                            uint32_t grp_verif_cert_size);
 
         public uint32_t asie_gen_nonce([size = nonce_size, out] uint8_t *p_nonce,
                                     uint32_t nonce_size);
@@ -101,12 +92,5 @@ enclave {
 
     untrusted {
         void ocall_print_string([in, string] const char *str);
-        //void ocall_get_ias_report([in] sgx_report_t *p_report,
-        //                        [user_check] uint8_t *p_ias_res,
-        //                        [out] uint32_t *p_ias_res_size,
-        //                        [user_check] uint8_t *p_ias_sig,
-        //                        [out] uint32_t *p_ias_sig_size,
-        //                        [user_check] uint8_t *p_ias_crt,
-        //                        [out] uint32_t *p_ias_crt_size);
     };
 };
