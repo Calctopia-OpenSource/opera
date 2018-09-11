@@ -37,7 +37,7 @@ typedef struct ASQuote {
 } ASQuote;
 
 uint32_t base64_decode(const unsigned char* aSrc, uint32_t srcLen, unsigned char* result);
-void array_reverse_order(uint8_t *array, uint32_t array_size);
+// void array_reverse_order(uint8_t *array, uint32_t array_size);
 
 bool is_ias_report_valid(
     uint8_t *p_ias_res,
@@ -79,11 +79,9 @@ size_t GetSigRlSize(SigRl* sig_rl);
 size_t GetEpidSigSize(EpidSignature* sig);
 size_t GetASQuoteSize(ASQuote* as_quote);
 
-uint32_t uint64_to_uint32 (uint64_t u64);
 sgx_status_t sgx_unseal_data_cur_cpusvn_only(const sgx_sealed_data_t *p_sealed_data,
         uint8_t *p_additional_MACtext,
         uint32_t *p_additional_MACtext_length,
         uint8_t *p_decrypted_text,
         uint32_t *p_decrypted_text_length);
-// char const* EpidStatusToString(EpidStatus e);
 #endif

@@ -23,7 +23,7 @@
         break;            \
   }
 
-extern void printf(const char *fmt, ...);
+// extern void printf(const char *fmt, ...);
 
 uint32_t base64_decode(const unsigned char* aSrc, uint32_t srcLen, unsigned char* result)
 { //two reasons will cause the function return 0: 1- The input parameters are wrong, 2- srcLen<4
@@ -115,60 +115,20 @@ uint8_t ias_root_ca_n[384] = {
     0x5e,0x41,0xd7,0xc0,0x32,0x27,0x2d,0x51,0xbb,0x3c,0x77,0xb5,0x7e,0x64,0x3c,0x9f};
 uint8_t ias_root_ca_e[4] = {0x01,0x00,0x01,0x00};
 
-// uint8_t ias_ca_n[256] = {
-//     0xb5,0x78,0x89,0x36,0x6a,0xf7,0x6c,0x66,0x1c,0xeb,0x5b,0x7a,0x46,0xcb,0x20,0x1d,
-//     0xfa,0x42,0x57,0xfb,0x5a,0xcd,0x00,0x23,0xa1,0x7a,0x8f,0x7e,0x12,0xcc,0x81,0x58,
-//     0xf5,0x15,0x1e,0x94,0x81,0xfc,0x4c,0x48,0x2d,0x51,0x46,0xa3,0x9a,0xc1,0x8a,0x9b,
-//     0x5c,0x80,0xe2,0xeb,0xbf,0xa3,0xfa,0x7e,0x2b,0xb7,0xd3,0x9e,0x81,0xda,0xa2,0xd2,
-//     0xfb,0x61,0x70,0x41,0xc2,0x1c,0xf2,0x5a,0xdb,0x1d,0x5c,0xb1,0x80,0x9c,0xf7,0x7f,
-//     0xa1,0xc0,0x11,0x6c,0x22,0x40,0xe8,0xb4,0xbd,0xe5,0x57,0x07,0xe0,0x78,0x18,0x7c,
-//     0x5e,0x27,0x8c,0x59,0x99,0xcd,0x04,0x27,0x9f,0x45,0xcc,0x3a,0xda,0x83,0x10,0x9d,
-//     0x58,0x89,0x8a,0x67,0x10,0x54,0xfc,0x33,0x3b,0x5d,0xc7,0x92,0xbf,0x95,0x7c,0x4f,
-//     0x24,0x7b,0xbb,0x42,0x2d,0xaf,0xdb,0xc2,0x5b,0x7c,0x2e,0x5c,0xdf,0x80,0x4a,0x2b,
-//     0x97,0x23,0xc4,0x89,0x44,0x75,0x67,0xcf,0xb4,0xbc,0x15,0x9a,0x43,0x6a,0x40,0x64,
-//     0xbf,0xd4,0xcd,0x6f,0x28,0x44,0x42,0x4d,0xbc,0x8f,0xa6,0xbe,0x74,0xfe,0x5e,0x72,
-//     0xed,0x4c,0xee,0xff,0x72,0x1d,0xd2,0x02,0x9e,0x72,0x1b,0x8f,0xfa,0x81,0x3d,0x6c,
-//     0x29,0x64,0xb8,0xb9,0xf5,0x1f,0xfd,0x17,0x88,0x9c,0xf9,0xb8,0xe6,0xd7,0xfe,0xd3,
-//     0x4b,0x10,0xf4,0x84,0xaf,0xdc,0x57,0x81,0x03,0x16,0xd7,0x10,0xf5,0x02,0xe8,0x74,
-//     0x1d,0x51,0x93,0xe0,0x6d,0xad,0x0f,0x04,0x3f,0x4b,0xfc,0x9a,0x09,0x92,0x71,0x6c,
-//     0x68,0x62,0x01,0xac,0x45,0xe7,0x9e,0x7c,0x14,0xa6,0x6e,0xe6,0xe0,0x2d,0x7a,0xa9};
-//     // 0xa9,0x7a,0x2d,0xe0,0xe6,0x6e,0xa6,0x14,0x7c,0x9e,0xe7,0x45,0xac,0x01,0x62,0x68,
-//     // 0x6c,0x71,0x92,0x09,0x9a,0xfc,0x4b,0x3f,0x04,0x0f,0xad,0x6d,0xe0,0x93,0x51,0x1d,
-//     // 0x74,0xe8,0x02,0xf5,0x10,0xd7,0x16,0x03,0x81,0x57,0xdc,0xaf,0x84,0xf4,0x10,0x4b,
-//     // 0xd3,0xfe,0xd7,0xe6,0xb8,0xf9,0x9c,0x88,0x17,0xfd,0x1f,0xf5,0xb9,0xb8,0x64,0x29,
-//     // 0x6c,0x3d,0x81,0xfa,0x8f,0x1b,0x72,0x9e,0x02,0xd2,0x1d,0x72,0xff,0xee,0x4c,0xed,
-//     // 0x72,0x5e,0xfe,0x74,0xbe,0xa6,0x8f,0xbc,0x4d,0x42,0x44,0x28,0x6f,0xcd,0xd4,0xbf,
-//     // 0x64,0x40,0x6a,0x43,0x9a,0x15,0xbc,0xb4,0xcf,0x67,0x75,0x44,0x89,0xc4,0x23,0x97,
-//     // 0x2b,0x4a,0x80,0xdf,0x5c,0x2e,0x7c,0x5b,0xc2,0xdb,0xaf,0x2d,0x42,0xbb,0x7b,0x24,
-//     // 0x4f,0x7c,0x95,0xbf,0x92,0xc7,0x5d,0x3b,0x33,0xfc,0x54,0x10,0x67,0x8a,0x89,0x58,
-//     // 0x9d,0x10,0x83,0xda,0x3a,0xcc,0x45,0x9f,0x27,0x04,0xcd,0x99,0x59,0x8c,0x27,0x5e,
-//     // 0x7c,0x18,0x78,0xe0,0x07,0x57,0xe5,0xbd,0xb4,0xe8,0x40,0x22,0x6c,0x11,0xc0,0xa1,
-//     // 0x7f,0xf7,0x9c,0x80,0xb1,0x5c,0x1d,0xdb,0x5a,0xf2,0x1c,0xc2,0x41,0x70,0x61,0xfb,
-//     // 0xd2,0xa2,0xda,0x81,0x9e,0xd3,0xb7,0x2b,0x7e,0xfa,0xa3,0xbf,0xeb,0xe2,0x80,0x5c,
-//     // 0x9b,0x8a,0xc1,0x9a,0xa3,0x46,0x51,0x2d,0x48,0x4c,0xfc,0x81,0x94,0x1e,0x15,0xf5,
-//     // 0x58,0x81,0xcc,0x12,0x7e,0x8f,0x7a,0xa1,0x23,0x00,0xcd,0x5a,0xfb,0x57,0x42,0xfa,
-//     // 0x1d,0x20,0xcb,0x46,0x7a,0x5b,0xeb,0x1c,0x66,0x6c,0xf7,0x6a,0x36,0x89,0x78,0xb5};
-// uint8_t ias_ca_e[4] = {0x01,0x00,0x01,0x00};
-
 void search_for_rsa_n_e(
     uint8_t *cert, uint32_t cert_size,
     uint8_t **rsa_n, uint32_t &rsa_n_size)
 {
     *rsa_n = NULL;
     uint64_t rsa_oid = 0x01010df78648862a;
-    // for (uint32_t j = 0; j < cert_size; j++) printf("%02x ", cert[j]); printf("\n");
     for (uint32_t i = 0; i < cert_size - 8; i++) {
         if (*((uint64_t*)(&cert[i])) == rsa_oid && cert[i + 8] == 0x01) {
             uint32_t e_offset = i + 22;
             rsa_n_size = (cert[e_offset] << 8) + cert[e_offset + 1] - 1;
             *rsa_n = &cert[e_offset + 3];
-            // for (uint32_t j = 0; j < rsa_n_size; j++) printf("%02x ", (*rsa_n)[j]); printf("\n");
             break;
-            // for (uint32_t j = 0; j < 32; j++) printf("%02x ", cert[i + j]); printf("\n");
         }
     }
-
-
 }
 
 bool verif_ias_cert(
@@ -176,7 +136,6 @@ bool verif_ias_cert(
     IppsRSAPublicKeyState **cert_rsa_pub_key)
 {
     if (*cert_rsa_pub_key) free(*cert_rsa_pub_key);
-    // bool is_valid = false;
     uint8_t *cert_buffer = NULL;
     IppStatus ipp_status = ippStsNoErr;
     IppsRSAPublicKeyState *root_ca_rsa_pub_key = NULL;
@@ -187,18 +146,18 @@ bool verif_ias_cert(
         char *cert_begin = strstr((const char *)p_ias_crt, "-----BEGIN CERTIFICATE-----");
         char *cert_end = strstr((const char *)p_ias_crt, "-----END CERTIFICATE-----");
         if (!cert_begin || !cert_end || cert_begin + 27 >= cert_end) {
-            printf("invalid cert\n");
+            // printf("invalid cert\n");
             break;
         }
         cert_begin += 27;
         cert_buffer = (uint8_t*) malloc(cert_end - cert_begin);
         if (!cert_buffer) {
-            printf("cert buffer malloc failed\n");
+            // printf("cert buffer malloc failed\n");
             break;
         }
         // decode cert
         base64_decode((const unsigned char *)cert_begin,
-                        uint64_to_uint32(cert_end - cert_begin),
+                        (uint32_t)(cert_end - cert_begin),
                         (unsigned char*)cert_buffer);
 
         uint32_t cert_body_size = (cert_buffer[6] << 8) + cert_buffer[7] + 4;
@@ -242,7 +201,7 @@ bool verif_ias_cert(
         ipp_status = ippsRSAVerify_PKCS1v15(&cert_buffer[4], cert_body_size, sig_begin, &is_valid, root_ca_rsa_pub_key, ippHashAlg_SHA256, buffer);
         BREAK_ON_IPP_ERROR(ipp_status)
         if (!is_valid) {
-            printf("ias cert is not valid\n");
+            // printf("ias cert is not valid\n");
             break;
         }
 
@@ -259,7 +218,7 @@ bool verif_ias_cert(
         search_for_rsa_n_e(&cert_buffer[4], cert_body_size,
                             &rsa_n, rsa_n_size);
         if (!rsa_n) {
-            printf("not rsa\n");
+            // printf("not rsa\n");
             break;
         }
 
@@ -341,33 +300,25 @@ bool is_ias_report_valid(
     if (!p_ias_res || ias_res_size == 0 ||
         !p_ias_sig || ias_sig_size == 0 ||
         !p_ias_crt || ias_crt_size == 0) {
-        printf("not valid\n");
+        // printf("not valid\n");
         return false;
     }
 
     uint8_t sig[256];
     if (256 != base64_decode(p_ias_sig, ias_sig_size, sig)) {
-        printf("base64_decode\n");
+        // printf("base64_decode\n");
         return false;
     }
 
     // verify ias ca usign ias root ca
     if (!verif_ias_cert(p_ias_crt, &rsa_pub_key) || !rsa_pub_key) 
     {
-        printf("ias cert invalid\n");
+        // printf("ias cert invalid\n");
         return false;
     }
-    // array_reverse_order(ias_ca_n, 256);
 
     do
     {
-        // ipp_status = create_rsa_pub_key(RSA_2048_KEY_BYTES,
-        //                    4,
-        //                    reinterpret_cast<const Ipp32u*>(ias_ca_n),
-        //                    reinterpret_cast<const Ipp32u*>(ias_ca_e),
-        //                    &rsa_pub_key);
-        // BREAK_ON_IPP_ERROR(ipp_status)
-
         int public_key_buffer_size = 0;
         ipp_status = ippsRSA_GetBufferSizePublicKey(&public_key_buffer_size, rsa_pub_key);
         BREAK_ON_IPP_ERROR(ipp_status)
@@ -381,13 +332,13 @@ bool is_ias_report_valid(
         BREAK_ON_IPP_ERROR(ipp_status)
 
         if (!is_valid) {
-            printf("verification failed\n");
-            for (uint32_t i = 0; i < ias_res_size; i++) printf("%c", p_ias_res[i]);
-                printf("\n");
-            for (uint32_t i = 0; i < ias_sig_size; i++) printf("%c", p_ias_sig[i]);
-                printf("\n");
-            for (uint32_t i = 0; i < ias_crt_size; i++) printf("%c", p_ias_crt[i]);
-                printf("\n");
+            // printf("verification failed\n");
+            // for (uint32_t i = 0; i < ias_res_size; i++) printf("%c", p_ias_res[i]);
+            //     printf("\n");
+            // for (uint32_t i = 0; i < ias_sig_size; i++) printf("%c", p_ias_sig[i]);
+            //     printf("\n");
+            // for (uint32_t i = 0; i < ias_crt_size; i++) printf("%c", p_ias_crt[i]);
+            //     printf("\n");
         }
     } while(0);
     if (buffer) free(buffer);
@@ -446,65 +397,101 @@ bool verify_ias_report(
 
 
 size_t GetPrivRlSize(PrivRl* priv_rl) {
-  return sizeof(PrivRl) - sizeof(FpElemStr) + (priv_rl? ntohl(priv_rl->n1) : 0) * sizeof(FpElemStr);
+  const size_t kMinSize = sizeof(PrivRl) - sizeof(FpElemStr);
+  if (!priv_rl) {
+    return kMinSize;
+  } else {
+    if (ntohl(priv_rl->n1) > (SIZE_MAX - kMinSize) / sizeof(FpElemStr)) {
+      return kMinSize;
+    } else {
+      return kMinSize + ntohl(priv_rl->n1) * sizeof(FpElemStr);
+    }
+  }
+  // return sizeof(PrivRl) - sizeof(FpElemStr) + (priv_rl? ntohl(priv_rl->n1) : 0) * sizeof(FpElemStr);
 }
 
 size_t GetSigRlSize(SigRl* sig_rl) {
-  return sizeof(SigRl) - sizeof(SigRlEntry) + (sig_rl? ntohl(sig_rl->n2) : 0) * sizeof(SigRlEntry);
+  const size_t kMinSize = sizeof(SigRl) - sizeof(SigRlEntry);
+  if (!sig_rl) {
+    return kMinSize;
+  } else {
+    if (ntohl(sig_rl->n2) > (SIZE_MAX - kMinSize) / sizeof(SigRlEntry)) {
+      return kMinSize;
+    } else {
+      return kMinSize + ntohl(sig_rl->n2) * sizeof(SigRlEntry);
+    }
+  }
+  // return sizeof(SigRl) - sizeof(SigRlEntry) + (sig_rl? ntohl(sig_rl->n2) : 0) * sizeof(SigRlEntry);
 }
 
 size_t GetEpidSigSize(EpidSignature* sig) {
-  return sizeof(EpidSignature) - sizeof(NrProof) + (sig ? ntohl(sig->n2) : 0) * sizeof(NrProof);
+  const size_t kMinSize = sizeof(EpidSignature) - sizeof(NrProof);
+  if (!sig) {
+    return kMinSize;
+  } else {
+    if (ntohl(sig->n2) > (SIZE_MAX - kMinSize) / sizeof(NrProof)) {
+      return kMinSize;
+    } else {
+      return kMinSize + ntohl(sig->n2) * sizeof(NrProof);
+    }
+  }
+  // return sizeof(EpidSignature) - sizeof(NrProof) + (sig ? ntohl(sig->n2) : 0) * sizeof(NrProof);
 }
 
 size_t GetASQuoteSize(ASQuote* as_quote) {
+  if (sizeof(ASQuote) + as_quote->signature_len >= SIZE_MAX) {
+    return sizeof(ASQuote);
+  } else {
     return sizeof(ASQuote) + as_quote->signature_len;
-}
-
-uint32_t uint64_to_uint32 (uint64_t u64) {
-    uint32_t *u32_ptr = const_cast<uint32_t *>(reinterpret_cast<uint32_t const *>(&u64));
-    return *u32_ptr;
-}
-
-struct ErrorTextEntry {
-  /// error code
-  EpidStatus value;
-  /// string associated with error code
-  char const* text;
-};
-
-/// Mapping of status codes to strings
-static const struct ErrorTextEntry kEnumToText[] = {
-    {kEpidNoErr, "no error"},
-    {kEpidErr, "unspecified error"},
-    {kEpidSigInvalid, "invalid signature"},
-    {kEpidSigRevokedInGroupRl, "signature revoked in GroupRl"},
-    {kEpidSigRevokedInPrivRl, "signature revoked in PrivRl"},
-    {kEpidSigRevokedInSigRl, "signature revoked in SigRl"},
-    {kEpidSigRevokedInVerifierRl, "signature revoked in VerifierRl"},
-    {kEpidNotImpl, "not implemented"},
-    {kEpidBadArgErr, "bad arguments"},
-    {kEpidNoMemErr, "could not allocate memory"},
-    {kEpidMemAllocErr, "insufficient memory provided"},
-    {kEpidMathErr, "internal math error"},
-    {kEpidDivByZeroErr, "attempt to divide by zero"},
-    {kEpidUnderflowErr, "underflow"},
-    {kEpidHashAlgorithmNotSupported, "unsupported hash algorithm type"},
-    {kEpidRandMaxIterErr, "reached max iteration for random number generation"},
-    {kEpidDuplicateErr, "argument would add duplicate entry"},
-    {kEpidInconsistentBasenameSetErr,
-     "the set basename is inconsistent with supplied parameters"}};
-
-char const* EpidStatusToString(EpidStatus e) {
-  size_t i = 0;
-  const size_t num_entries = sizeof(kEnumToText) / sizeof(kEnumToText[0]);
-  for (i = 0; i < num_entries; i++) {
-    if (e == kEnumToText[i].value) {
-      return kEnumToText[i].text;
-    }
   }
-  return "unknown error";
+  // return sizeof(ASQuote) + as_quote->signature_len;
 }
+
+// uint32_t uint64_to_uint32 (uint64_t u64) {
+//     return (uint32_t)u64;
+//     uint32_t *u32_ptr = const_cast<uint32_t *>(reinterpret_cast<uint32_t const *>(&u64));
+//     return *u32_ptr;
+// }
+
+// struct ErrorTextEntry {
+//   /// error code
+//   EpidStatus value;
+//   /// string associated with error code
+//   char const* text;
+// };
+
+// /// Mapping of status codes to strings
+// static const struct ErrorTextEntry kEnumToText[] = {
+//     {kEpidNoErr, "no error"},
+//     {kEpidErr, "unspecified error"},
+//     {kEpidSigInvalid, "invalid signature"},
+//     {kEpidSigRevokedInGroupRl, "signature revoked in GroupRl"},
+//     {kEpidSigRevokedInPrivRl, "signature revoked in PrivRl"},
+//     {kEpidSigRevokedInSigRl, "signature revoked in SigRl"},
+//     {kEpidSigRevokedInVerifierRl, "signature revoked in VerifierRl"},
+//     {kEpidNotImpl, "not implemented"},
+//     {kEpidBadArgErr, "bad arguments"},
+//     {kEpidNoMemErr, "could not allocate memory"},
+//     {kEpidMemAllocErr, "insufficient memory provided"},
+//     {kEpidMathErr, "internal math error"},
+//     {kEpidDivByZeroErr, "attempt to divide by zero"},
+//     {kEpidUnderflowErr, "underflow"},
+//     {kEpidHashAlgorithmNotSupported, "unsupported hash algorithm type"},
+//     {kEpidRandMaxIterErr, "reached max iteration for random number generation"},
+//     {kEpidDuplicateErr, "argument would add duplicate entry"},
+//     {kEpidInconsistentBasenameSetErr,
+//      "the set basename is inconsistent with supplied parameters"}};
+
+// char const* EpidStatusToString(EpidStatus e) {
+//   size_t i = 0;
+//   const size_t num_entries = sizeof(kEnumToText) / sizeof(kEnumToText[0]);
+//   for (i = 0; i < num_entries; i++) {
+//     if (e == kEnumToText[i].value) {
+//       return kEnumToText[i].text;
+//     }
+//   }
+//   return "unknown error";
+// }
 
 sgx_status_t sgx_unseal_data_cur_cpusvn_only(const sgx_sealed_data_t *p_sealed_data,
         uint8_t *p_additional_MACtext,

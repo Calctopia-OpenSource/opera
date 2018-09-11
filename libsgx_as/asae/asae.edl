@@ -35,6 +35,7 @@ enclave {
     include "sgx_quote.h"
     from "sgx_tae_service.edl" import *;
     trusted {
+        public uint32_t asae_init_member();
         public uint32_t asae_join_request([size = pub_key_size, in] uint8_t *p_pub_key,
                                     uint32_t pub_key_size,
                                     [size = pub_key_size, in] uint8_t *p_nonce,
@@ -43,7 +44,7 @@ enclave {
                                     uint32_t join_request_size,
                                     [in] sgx_target_info_t *p_target_info,
                                     [out] sgx_report_t *p_report);
-        public uint32_t asae_create_member(
+        public uint32_t asae_provision_member(
                                     [size = member_cred_size, in] uint8_t *p_member_cred,
                                     uint32_t member_cred_size);
                                     
@@ -52,6 +53,10 @@ enclave {
                                     uint32_t sealed_blob_size);
         public uint32_t asae_unseal_member([size = sealed_blob_size, in] const uint8_t *p_sealed_blob,
                                     uint32_t sealed_blob_size);
+
+        public uint32_t asae_set_sig_rl(
+                                    [size = sig_rl_size, in] const uint8_t *p_sig_rl,
+                                    uint32_t sig_rl_size);
 
         public uint32_t asae_update_ts_reqest(
                                     [in] sgx_target_info_t *p_target_info,
@@ -65,12 +70,8 @@ enclave {
                                     [size = ias_crt_size, in] uint8_t *p_ias_crt,
                                     uint32_t ias_crt_size);
 
-        public uint32_t asae_calc_quote_size([out] size_t *p_quote_size,
-                                    [size = sig_rl_size, in] const uint8_t *p_sig_rl,
-                                    uint32_t sig_rl_size);
+        public uint32_t asae_calc_quote_size([out] uint32_t *p_quote_size);
         public uint32_t asae_get_quote([in] const sgx_report_t *p_report,
-        							[size = sig_rl_size, in] const uint8_t *p_sig_rl,
-                                    uint32_t sig_rl_size,
 									[size = quote_size, out] uint8_t *p_quote,
                                     uint32_t quote_size);
     };

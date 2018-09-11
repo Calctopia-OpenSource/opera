@@ -114,12 +114,9 @@ uint32_t ias_res_size, ias_sig_size, ias_crt_size;
 uint8_t *gvc_ias_res = NULL, *gvc_ias_sig = NULL, *gvc_ias_crt = NULL;
 uint32_t gvc_ias_res_size, gvc_ias_sig_size, gvc_ias_crt_size;
 uint8_t *priv_rl = NULL, *sig_rl = NULL;
-size_t priv_rl_size, sig_rl_size;
+uint32_t priv_rl_size, sig_rl_size;
 
 uint8_t cur_ts[AS_TS_SIZE + 1];
-
-uint8_t *as_quote = NULL;
-size_t as_quote_size = 0;
 
 void print_array(uint8_t* array, uint32_t array_size, bool debug = false) {
     if (!debug) return;

@@ -62,8 +62,6 @@
 #include <assert.h>
 #include <time.h>
 
-// #include "../../libsgx_as/asie/asie_u.h"
-// #include "../../libsgx_as/asae/asae_u.h"
 #include "../../libsgx_as/asve/asve_u.h"
 
 // Needed to query extended epid group id.
@@ -71,17 +69,10 @@
 #include "../../GeneralSettings.h"
 #include "../../Util/UtilityFunctions.h"
 
-// #define ASIE_ENCLAVE_FILENAME "asie.signed.so"
-// #define ASAE_ENCLAVE_FILENAME "asae.signed.so"
-
 # define ISVE_ENCLAVE_FILENAME "enclave.signed.so"
 # define ASVE_ENCLAVE_FILENAME "asve.signed.so"
 
 /* Global EID shared by multiple threads */
-// sgx_enclave_id_t global_eid = 0;
-// sgx_enclave_id_t asie_eid = 0;
-// sgx_enclave_id_t asae_eid = 0;
-// sgx_enclave_id_t asae_eid2 = 0;
 sgx_enclave_id_t isve_eid = 0;
 sgx_enclave_id_t asve_eid = 0;
 
@@ -148,76 +139,6 @@ void print_array(uint8_t* array, uint32_t array_size, bool debug = false) {
     write(fd, &array_size, sizeof(array_size));     \
     write(fd, array, array_size);
 
-// uint32_t as_init_quote(
-//     sgx_target_info_t *p_asae_target_info,
-//     sgx_target_info_t *p_asie_target_info,
-//     const char* service_domain)
-// {
-    
-//     int client_sockfd = -1;
-//     struct sockaddr_un server_addr;
-
-//     client_sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-//     if (client_sockfd == -1) {
-//         printf("failed to create socket\n");
-//         return -1;
-//     }
-
-//     server_addr.sun_family = AF_UNIX;
-//     strncpy(server_addr.sun_path, service_domain, sizeof(server_addr.sun_path) - 1);
-//     if (connect(client_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-//         printf("failed to connect to server\n");
-//         close(client_sockfd);
-//         // unlink(SERVICE_DOMAIN);
-//         return -1;
-//     }
-
-//     uint8_t option = 1;
-//     write(client_sockfd, &option, 1);
-//     size_t quote_size = -1;
-//     read(client_sockfd, p_asae_target_info, sizeof(sgx_target_info_t));
-//     read(client_sockfd, p_asie_target_info, sizeof(sgx_target_info_t));
-
-//     close(client_sockfd);
-//     // unlink(SERVICE_DOMAIN);
-
-//     return quote_size;
-// }
-
-// uint32_t as_calc_quote_size(
-//     size_t &quote_size,
-//     const char* service_domain)
-// {
-    
-//     int client_sockfd = -1;
-//     struct sockaddr_un server_addr;
-
-//     client_sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-//     if (client_sockfd == -1) {
-//         printf("failed to create socket\n");
-//         return -1;
-//     }
-
-//     server_addr.sun_family = AF_UNIX;
-//     strncpy(server_addr.sun_path, service_domain, sizeof(server_addr.sun_path) - 1);
-//     if (connect(client_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-//         printf("failed to connect to server\n");
-//         close(client_sockfd);
-//         // unlink(SERVICE_DOMAIN);
-//         return -1;
-//     }
-
-//     uint8_t option = 2;
-//     write(client_sockfd, &option, 1);
-//     read(client_sockfd, &quote_size, sizeof(quote_size));
-
-//     close(client_sockfd);
-//     // unlink(SERVICE_DOMAIN);
-
-//     return quote_size;
-// }
-
-
 uint32_t as_get_quote(
     sgx_report_t &report,
     uint8_t *&p_quote,
@@ -239,7 +160,6 @@ uint32_t as_get_quote(
     if (connect(client_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         printf("failed to connect to server\n");
         close(client_sockfd);
-        // unlink(SERVICE_DOMAIN);
         return -1;
     }
 
@@ -260,105 +180,9 @@ uint32_t as_get_quote(
       res = 0;
     } while(0);
     close(client_sockfd);
-    // unlink(SERVICE_DOMAIN);
 
     return res;
 }
-
-// uint32_t as_get_cert(
-//     uint8_t *&p_grp_verif_cert,
-//     uint32_t &cert_size,
-//     uint8_t *&p_ias_res,
-//     uint32_t &ias_res_size,
-//     uint8_t *&p_ias_sig,
-//     uint32_t &ias_sig_size,
-//     uint8_t *&p_ias_crt,
-//     uint32_t &ias_crt_size,
-//     uint8_t *&p_priv_rl,
-//     size_t &priv_rl_size,
-//     uint8_t *&p_sig_rl,
-//     size_t &sig_rl_size,
-//     const char* service_domain)
-// {
-    
-//     int client_sockfd = -1;
-//     struct sockaddr_un server_addr;
-
-//     client_sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-//     if (client_sockfd == -1) {
-//         printf("failed to create socket\n");
-//         return -1;
-//     }
-
-//     server_addr.sun_family = AF_UNIX;
-//     strncpy(server_addr.sun_path, service_domain, sizeof(server_addr.sun_path) - 1);
-//     if (connect(client_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-//         printf("failed to connect to server\n");
-//         close(client_sockfd);
-//         // unlink(SERVICE_DOMAIN);
-//         return -1;
-//     }
-
-//     uint8_t option = 4;
-//     write(client_sockfd, &option, 1);
-//     do {
-//         read(client_sockfd, &cert_size, sizeof(cert_size));
-//         p_grp_verif_cert = (uint8_t *) malloc(cert_size);
-//         if (!p_grp_verif_cert) {
-//             printf("failed to malloc p_grp_verif_cert\n");
-//             break;
-//         }
-//         read(client_sockfd, p_grp_verif_cert, cert_size);
-
-//         read(client_sockfd, &ias_res_size, sizeof(ias_res_size));
-//         p_ias_res = (uint8_t *) malloc(ias_res_size);
-//         if (!p_ias_res) {
-//             printf("failed to malloc p_ias_res\n");
-//             break;
-//         }
-//         read(client_sockfd, p_ias_res, ias_res_size);
-
-//         read(client_sockfd, &ias_sig_size, sizeof(ias_sig_size));
-//         p_ias_sig = (uint8_t *) malloc(ias_sig_size);
-//         if (!p_ias_sig) {
-//             printf("failed to malloc p_ias_sig\n");
-//             break;
-//         }
-//         read(client_sockfd, p_ias_sig, ias_sig_size);
-
-//         read(client_sockfd, &ias_crt_size, sizeof(ias_crt_size));
-//         p_ias_crt = (uint8_t *) malloc(ias_crt_size);
-//         if (!p_ias_crt) {
-//             printf("failed to malloc p_ias_crt\n");
-//             break;
-//         }
-//         read(client_sockfd, p_ias_crt, ias_crt_size);
-
-//         read(client_sockfd, &priv_rl_size, sizeof(priv_rl_size));
-//         p_priv_rl = (uint8_t *) malloc(priv_rl_size);
-//         if (!p_priv_rl) {
-//             printf("failed to malloc p_priv_rl\n");
-//             break;
-//         }
-//         read(client_sockfd, p_priv_rl, priv_rl_size);
-
-//         read(client_sockfd, &sig_rl_size, sizeof(sig_rl_size));
-//         p_sig_rl = (uint8_t *) malloc(sig_rl_size);
-//         if (!p_sig_rl) {
-//             printf("failed to malloc p_sig_rl\n");
-//             break;
-//         }
-//         read(client_sockfd, p_sig_rl, sig_rl_size);
-
-//         // printf("got cert!\n");
-//     } while (0);
-
-
-//     close(client_sockfd);
-//     // unlink(SERVICE_DOMAIN);
-
-//     return 0;
-// }
 
 
 void as_attestation(
@@ -372,8 +196,6 @@ void as_attestation(
 
     do
     {
-        // as_init_quote(&asae_target_info, &asie_target_info, service_domain);
-        // print_array((uint8_t*)&asae_target_info, sizeof(asae_target_info), true);
         sgx_report_t isve_report;
         //isve gen report
         ret = isve_gen_report(isve_eid, &enclave_ret,
@@ -389,12 +211,13 @@ void as_attestation(
         // printf("isve_target_info:\n");
         // print_array((uint8_t*)&isve_target_info, sizeof(isve_target_info), true);
 
-        // //asae get quote
+        //asae get quote
         uint32_t res = as_get_quote(isve_report, as_quote, as_quote_size, service_domain);
         if (0 != res) {
           printf("as_get_quote error!\n");
           break;
         }
+        // print_array(as_quote, as_quote_size, 1);
 
         //asve verify quote
         uint32_t is_valid = 0;
@@ -417,10 +240,9 @@ void as_attestation(
         if (is_valid == 0) {
           printf("as_quote is not valid\n");
           break;
+        } else {
+            printf("as_quote is valid\n");
         }
-        // BREAK_ON_ECALL(ret, "asve_verify_quote", enclave_ret)
-        // printf("\n--------as_quote is %svalid--------\n\n", (is_valid ? "" : "not "));
-
     } while(0);
 }
 
@@ -439,29 +261,9 @@ int SGX_CDECL main(int argc, char *argv[])
     
     sgx_launch_token_t isve_token = {0};
     sgx_launch_token_t asve_token = {0};
-    // int asie_updated = 0;
-    // int asae_updated = 0;
     int isve_updated = 0;
     int asve_updated = 0;
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
-    // ret = sgx_create_enclave(ASIE_ENCLAVE_FILENAME, SGX_DEBUG_FLAG, &asie_token, &asie_updated, &asie_eid, NULL);
-    // if (ret != SGX_SUCCESS) {
-    //     printf("failed creating asie %x\n", ret);
-    //     return -1;
-    // }
-    // printf("create asie successfully\n");
-    // ret = sgx_create_enclave(ASAE_ENCLAVE_FILENAME, SGX_DEBUG_FLAG, &asae_token, &asae_updated, &asae_eid, NULL);
-    // if (ret != SGX_SUCCESS) {
-    //     printf("failed creating asae %x\n", ret);
-    //     return -1;
-    // }
-    // printf("create asae successfully\n");
-    // ret = sgx_create_enclave(ASAE_ENCLAVE_FILENAME, SGX_DEBUG_FLAG, &asae_token, &asae_updated, &asae_eid2, NULL);
-    // if (ret != SGX_SUCCESS) {
-    //     printf("failed creating asae2 %x\n", ret);
-    //     return -1;
-    // }
-    // printf("create asae successfully\n");
     ret = sgx_create_enclave(ISVE_ENCLAVE_FILENAME, SGX_DEBUG_FLAG, &isve_token, &isve_updated, &isve_eid, NULL);
     if (ret != SGX_SUCCESS) {
         printf("failed creating isve %x\n", ret);
@@ -475,53 +277,27 @@ int SGX_CDECL main(int argc, char *argv[])
     }
     printf("create asve successfully\n");
 
-    // uint8_t a;
-    // printf("app a:%llx\n", &a);
-    // uint32_t enclave_ret = -1;
-    // ret = ecall_main(isve_eid, &enclave_ret, &a);
-    // as_init();
+    // do {
+    //     int numIters = 10;
+    //     struct timespec start_stop_watch_u, stop_stop_watch_u;
+    //     clock_gettime(CLOCK_REALTIME, &start_stop_watch_u);
 
+    //     for (int i = 0; i < numIters; i++) {
+    //       as_attestation(isve_eid, argv[argc - 1]);
+    //     }
 
-    // asie_setup(asie_eid);
+    //     clock_gettime(CLOCK_REALTIME, &stop_stop_watch_u);
+    //     unsigned long nanosec = ((unsigned long)((stop_stop_watch_u.tv_sec - start_stop_watch_u.tv_sec) * 1000000 + (stop_stop_watch_u.tv_nsec - start_stop_watch_u.tv_nsec) / 1000));
+    //     double secs = (double) nanosec / 1000000;
+    //     printf("%f iters/sec (%d iters in %f sec)\n", numIters / secs, numIters, secs);
+    // } while(0);
 
-    // as_join(asie_eid, asae_eid);
-    // asae_backup(asae_eid);
-    // asae_restore(asae_eid2);
-    // as_join(asie_eid, asae_eid2);
-    // for (int i = 0; i < 10; i++)
-    // as_attestation(asie_eid, isve_eid, asae_eid);
-    // for (int i = 0; i < 10; i++)
-    // as_attestation(asie_eid, isve_eid, asae_eid2);
-    // as_attestation(asie_eid, isve_eid, asae_eid);
-    // as_attestation(asie_eid, isve_eid, asae_eid2);
+    as_attestation(isve_eid, argv[argc - 1]);
+    as_attestation(isve_eid, argv[argc - 1]);
+    as_attestation(isve_eid, argv[argc - 1]);
+    as_attestation(isve_eid, argv[argc - 1]);
+    as_attestation(isve_eid, argv[argc - 1]);
 
-    // asie_delete(asie_eid);
-
-    // printf("quote_size %lu\n", as_calc_quote_size());
-while(1) {
-    int numIters = 100;
-    struct timespec start_stop_watch_u, stop_stop_watch_u;
-    clock_gettime(CLOCK_REALTIME, &start_stop_watch_u);
-
-    for (int i = 0; i < numIters; i++) {
-      // printf("%d:\n", i);
-      as_attestation(isve_eid, argv[argc - 1]);
-    }
-
-    clock_gettime(CLOCK_REALTIME, &stop_stop_watch_u);
-    unsigned long nanosec = ((unsigned long)((stop_stop_watch_u.tv_sec - start_stop_watch_u.tv_sec) * 1000000 + (stop_stop_watch_u.tv_nsec - start_stop_watch_u.tv_nsec) / 1000));
-    double secs = (double) nanosec / 1000000;
-    printf("%f iters/sec (%d iters in %f sec)\n", numIters / secs, numIters, secs);
-}
-    // as_attestation(isve_eid);
-    // as_attestation(isve_eid);
-    // as_attestation(isve_eid);
-    // as_attestation(isve_eid);
-    // as_attestation(isve_eid);
-
-    // sgx_destroy_enclave(asie_eid);
-    // sgx_destroy_enclave(asae_eid);
-    // sgx_destroy_enclave(asae_eid2);
     sgx_destroy_enclave(isve_eid);
     sgx_destroy_enclave(asve_eid);
     

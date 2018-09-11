@@ -34,33 +34,34 @@ include ../buildenv.mk
 CXXFLAGS  += -Werror
 CFLAGS	+= -Werror 
 
-EPID_SDK_DIR = $(LINUX_EXTERNAL_DIR)/epid-sdk-3.0.0
-EXTERNAL_LIB += -L$(EPID_SDK_DIR)/epid/common -lcommon \
-				-L$(EPID_SDK_DIR)/epid/member -lmember \
-				-L$(EPID_SDK_DIR)/epid/verifier -lverifier \
-				-L$(EPID_SDK_DIR)/ext/ipp/sources/ippcpepid/src -lippcpepid
-				
+EPID_SDK_DIR := $(LINUX_EXTERNAL_DIR)/epid-sdk/
+INCLUDE += -I$(LINUX_PSW_DIR)/ae/data/constants/linux 
 
-INCLUDE += -I$(LINUX_PSW_DIR)/ae/data/constants/linux \
-		   -I$(SGX_IPP_INC)/                          \
-		   -I$(LINUX_EXTERNAL_DIR)/epid-sdk-3.0.0     \
-		   -I$(LINUX_PSW_DIR)/ae/common               \
-		   -I$(COMMON_DIR)/inc/tlibc                  \
-		   -I$(LINUX_PSW_DIR)/ae/inc/internal         \
-		   -I$(LINUX_PSW_DIR)/ae/pve  				  \
+INCLUDE += -I$(COMMON_DIR)/inc/tlibc                      \
+		   -I$(SGX_IPP_INC)/                              \
+		   -I$(EPID_SDK_DIR)                              \
+		   -I$(LINUX_PSW_DIR)/ae/common                   \
+		   -I$(LINUX_PSW_DIR)/ae/pve                      \
+		   -I$(LINUX_PSW_DIR)/ae/inc/internal             \
 		   -I../ascommon
+				
+TCRYPTO_LIBDIR := $(LINUX_SDK_DIR)/tlibcrypto
+EPID_LIBDIR	   := $(EPID_SDK_DIR)
+
+EXTERNAL_LIB += -L$(EPID_LIBDIR)/epid/member -lmember \
+				-L$(EPID_LIBDIR)/epid/verifier -lverifier \
+				-L$(EPID_LIBDIR)/epid/common -lcommon \
+				-L$(TCRYPTO_LIBDIR) -lsgx_tcrypto
+
 
 SRC := $(wildcard *.cpp)
-# SRC += $(wildcard issuer/src/*.cpp)
 SRC += pve_qe_common.cpp 			\
+       ipp_bn.cpp                   \
+	   ipp_rsa_pub_key.cpp			\
        $(LINUX_PSW_DIR)/ae/pve/cipher.cpp			\
        $(LINUX_PSW_DIR)/ae/pve/pve_rng.cpp			\
        $(LINUX_PSW_DIR)/ae/pve/helper.cpp			\
-       ipp_bn.cpp                   \
-	   ipp_rsa_pub_key.cpp			\
-	   ../ascommon/as_util.cpp  
-# 	   se_ecdsa_verify_internal.cpp   \
-# 	   se_sig_rl.cpp               
+	   ../ascommon/as_util.cpp
 
 
 OBJ := $(SRC:.cpp=.o)
@@ -76,16 +77,9 @@ EPID:
 	cd $(EPID_SDK_DIR) && ./configure prefix=/usr/local
 	$(MAKE) -C $(EPID_SDK_DIR) 2> /dev/null
 
-# SGX_SDK ?= /opt/intel/sgxsdk
-# SGX_ENCLAVE_SIGNER := $(SGX_SDK)/bin/x86/sgx_sign
-# SONAME_CONFIG := config.xml
-
-# $(SIGNED_SONAME):  $(SONAME)
-# 	@$(SGX_ENCLAVE_SIGNER) sign -key as_private.pem -enclave $(SONAME) -out $@ -config $(SONAME_CONFIG)
-# 	@echo "SIGN =>  $@"
 
 $(SONAME): $(OBJS) EPID
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -nostdlib -nodefaultlibs -nostartfiles $(LDTFLAGS) -lsgx_tstdcxx -lsgx_tstdc
+	$(CXX) $(CXXFLAGS) -o $@  $(OBJS)  -nostdlib -nodefaultlibs -nostartfiles $(LDTFLAGS) -fno-exceptions -fno-rtti $(EXTERNAL_LIB)  -lsgx_tstdcxx -lsgx_tstdc
 	$(STRIP)  --strip-unneeded $(SONAME)
 
 $(OBJ): $(AENAME)_t.c $(AENAME)_u.c

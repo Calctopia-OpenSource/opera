@@ -42,11 +42,17 @@ CP    := /bin/cp -f
 MKDIR := mkdir -p
 STRIP := strip
 OBJCOPY := objcopy
+NIPX := .nipx
+NIPD := .nipd
+NIPRODT := .niprod
 
 # clean the content of 'INCLUDE' - this variable will be set by vcvars32.bat
 # thus it will cause build error when this variable is used by our Makefile,
 # when compiling the code under Cygwin tainted by MSVC environment settings.
 INCLUDE :=
+
+# this will return the path to the file that included the buildenv.mk file
+CUR_DIR := $(realpath $(call parent-dir,$(lastword $(wordlist 2,$(words $(MAKEFILE_LIST)),x $(MAKEFILE_LIST)))))
 
 # turn on stack protector for SDK
 CC_BELOW_4_9 := $(shell expr "`$(CC) -dumpversion`" \< "4.9")
@@ -67,6 +73,14 @@ ifdef SE_SIM
     COMMON_FLAGS += -DSE_SIM
 endif
 
+# Disable ref-LE build by default.
+# Users could enable the ref-LE build 
+# by explicitly specifying 'BUILD_REF_LE=1'
+BUILD_REF_LE ?= 0
+ifeq ($(BUILD_REF_LE), 1)
+    COMMON_FLAGS += -DREF_LE
+endif
+
 COMMON_FLAGS += -ffunction-sections -fdata-sections
 
 # turn on compiler warnings as much as possible
@@ -83,13 +97,13 @@ CXXFLAGS += -Wnon-virtual-dtor
 
 CXXFLAGS += -std=c++11
 
-# .DEFAULT_GOAL := all
-# # this turns off the RCS / SCCS implicit rules of GNU Make
-# % : RCS/%,v
-# % : RCS/%
-# % : %,v
-# % : s.%
-# % : SCCS/s.%
+.DEFAULT_GOAL := all
+# this turns off the RCS / SCCS implicit rules of GNU Make
+% : RCS/%,v
+% : RCS/%
+% : %,v
+% : s.%
+% : SCCS/s.%
 
 # If a rule fails, delete $@.
 .DELETE_ON_ERROR:
@@ -162,9 +176,9 @@ endif
 SGX_IPP_DIR     := $(ROOT_DIR)/external/ippcp_internal
 SGX_IPP_INC     := $(SGX_IPP_DIR)/inc
 IPP_LIBS_DIR    := $(SGX_IPP_DIR)/lib/linux/$(IPP_SUBDIR)
-LD_IPP          := -lippcp -lippcore
+LD_IPP          := -lippcp
 
-
+#########################################
 
 WORK_DIR := $(shell pwd)
 AENAME   := $(notdir $(WORK_DIR))

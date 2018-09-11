@@ -116,12 +116,12 @@ uint32_t ias_res_size, ias_sig_size, ias_crt_size;
 uint8_t *gvc_ias_res = NULL, *gvc_ias_sig = NULL, *gvc_ias_crt = NULL;
 uint32_t gvc_ias_res_size, gvc_ias_sig_size, gvc_ias_crt_size;
 uint8_t *priv_rl = NULL, *sig_rl = NULL;
-size_t priv_rl_size, sig_rl_size;
+uint32_t priv_rl_size, sig_rl_size;
 
 uint8_t cur_ts[AS_TS_SIZE + 1];
 
 uint8_t *as_quote = NULL;
-size_t as_quote_size = 0;
+uint32_t as_quote_size = 0;
 
 void print_array(uint8_t* array, uint32_t array_size, bool debug = false) {
     if (!debug) return;
@@ -294,6 +294,10 @@ uint32_t asp_provisioning()
         uint8_t nonce[NONCE_SIZE] = {0};
         read(client_sockfd, nonce, NONCE_SIZE);
 
+        //asae init member
+        ret = asae_init_member(asae_eid, &enclave_ret);
+        BREAK_ON_ECALL(ret, "asae_init_member", enclave_ret)
+
         //asae gen join req
         sgx_quote_prepare();
 
@@ -332,11 +336,15 @@ uint32_t asp_provisioning()
         uint8_t member_cred[MEMBER_CRED_SIZE] = {0};
         read(client_sockfd, member_cred, MEMBER_CRED_SIZE);
 
-        // asae create member
-        ret = asae_create_member(asae_eid, &enclave_ret,
+        // asae provision member
+        ret = asae_provision_member(asae_eid, &enclave_ret,
                                 member_cred, MEMBER_CRED_SIZE);
-        BREAK_ON_ECALL(ret, "asae_create_member", enclave_ret)
+        BREAK_ON_ECALL(ret, "asae_provision_member", enclave_ret)
 
+        // asae set sig_rl
+        ret = asae_set_sig_rl(asae_eid, &enclave_ret,
+                                sig_rl, sig_rl_size);
+        BREAK_ON_ECALL(ret, "asae_set_sig_rl", enclave_ret)
     } while (0);
     close(client_sockfd);
     return 0;
@@ -401,7 +409,7 @@ uint32_t asp_update()
                                     ias_sig, ias_sig_size,
                                     ias_crt, ias_crt_size);
         BREAK_ON_ECALL(ret, "asae_update_ts_reqest", enclave_ret)
-        ret = asae_calc_quote_size(asae_eid, &enclave_ret, &as_quote_size, sig_rl, sig_rl_size);
+        ret = asae_calc_quote_size(asae_eid, &enclave_ret, &as_quote_size);
         BREAK_ON_ECALL(ret, "asae_calc_quote_size", enclave_ret)
     } while (0);
     close(client_sockfd);
@@ -463,7 +471,7 @@ void aservice(const char* server_domain) {
             memset(as_quote, 0, as_quote_size);
 
             ret = asae_get_quote(asae_eid, &enclave_ret,
-                        &report, sig_rl, sig_rl_size, as_quote, as_quote_size);
+                        &report, as_quote, as_quote_size);
             if (ret != SGX_SUCCESS || enclave_ret != 0) {
                 printf("asae_get_quote error\n");
                 break;
@@ -523,7 +531,25 @@ int SGX_CDECL main(int argc, char *argv[])
     asp_get_cert();
     asp_provisioning();
     asp_update();
+    // do {
+    //         sgx_report_t report;
 
+    //         uint32_t enclave_ret = -1;
+    //         free(as_quote);
+    //         as_quote = (uint8_t*) malloc(as_quote_size);
+    //         if (!as_quote) {
+    //             printf("failed to malloc as_quote\n");
+    //             break;
+    //         }
+    //         memset(as_quote, 0, as_quote_size);
+
+    //         ret = asae_get_quote(asae_eid, &enclave_ret,
+    //                     &report, as_quote, as_quote_size);
+    //         if (ret != SGX_SUCCESS || enclave_ret != 0) {
+    //             printf("asae_get_quote error\n");
+    //             break;
+    //         }
+    // } while (0);
     aservice(argv[1]);
 
     sgx_destroy_enclave(asae_eid);

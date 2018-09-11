@@ -1,4 +1,3 @@
-
 #include "issuer.h"
 
 /// Handle SDK Error with Break
@@ -15,8 +14,6 @@
       oct.data[3] = (unsigned char)((((uint32_t)(u32)) & 0xFF));   \
     } while(0);
 
-
-// extern void printf(const char *fmt, ...);
 
 EpidStatus CreateIssueKey(FiniteField* Fp, 
                           BitSupplier rnd_func, void* rnd_func_param,
@@ -72,6 +69,8 @@ EpidStatus GenerateGroupPubKey(Epid2Params_* epid2_params, IPrivKey_* ipriv_key,
     return kEpidBadArgErr;
   }
 
+  if (!rnd_func_param) {};
+
   EcGroup* G1 = epid2_params->G1;
   EcGroup* G2 = epid2_params->G2;
   FiniteField* Fp = epid2_params->Fp;
@@ -86,12 +85,12 @@ EpidStatus GenerateGroupPubKey(Epid2Params_* epid2_params, IPrivKey_* ipriv_key,
     result = NewEcPoint(G1, &pubkey->h1);
     BREAK_ON_EPID_ERROR(result);
     result =
-        EcGetRandom(G1, rnd_func, rnd_func_param, pubkey->h1);
+        EcGetRandom(G1, rnd_func, &rnd_func, pubkey->h1);
     BREAK_ON_EPID_ERROR(result);
     result = NewEcPoint(G1, &pubkey->h2);
     BREAK_ON_EPID_ERROR(result);
     result =
-        EcGetRandom(G1, rnd_func, rnd_func_param, pubkey->h2);
+        EcGetRandom(G1, rnd_func, &rnd_func, pubkey->h2);
     BREAK_ON_EPID_ERROR(result);
 
     result = NewEcPoint(G2, &pubkey->w);
@@ -250,21 +249,21 @@ EpidStatus EpidIssuerCreate(BitSupplier rnd_func, void* rnd_param, IssuerCtx** c
     return kEpidMemAllocErr;
   }
 
-  issuer_ctx->priv_rl = malloc(sizeof(PrivRl) - sizeof(FpElemStr));
+  issuer_ctx->priv_rl = SAFE_ALLOC(sizeof(PrivRl) - sizeof(FpElemStr));
   if (!issuer_ctx->priv_rl) {
-    free(issuer_ctx);
+    SAFE_FREE(issuer_ctx);
     return kEpidMemAllocErr;
   }
 
-  issuer_ctx->sig_rl = malloc(sizeof(SigRl) - sizeof(SigRlEntry));
+  issuer_ctx->sig_rl = SAFE_ALLOC(sizeof(SigRl) - sizeof(SigRlEntry));
   if (!issuer_ctx->sig_rl) {
-    free(issuer_ctx->priv_rl);
-    free(issuer_ctx);
+    SAFE_FREE(issuer_ctx->priv_rl);
+    SAFE_FREE(issuer_ctx);
     return kEpidMemAllocErr;
   }
 
   do {
-    issuer_ctx->hash_alg = kSha512;
+    issuer_ctx->hash_alg = kSha256;
     // Internal representation of Epid2Params
     result = CreateEpid2Params(&issuer_ctx->epid2_params);
     BREAK_ON_EPID_ERROR(result);
@@ -296,15 +295,10 @@ EpidStatus EpidIssuerCreate(BitSupplier rnd_func, void* rnd_param, IssuerCtx** c
   } while (0);
 
   if (kEpidNoErr != result) {
-    DeleteEpid2Params(&issuer_ctx->epid2_params);
-    DeleteGroupPubKey(&issuer_ctx->pub_key);
-    DeleteIssueKey(&issuer_ctx->ipriv_key);
-    free(issuer_ctx->priv_rl);
-    free(issuer_ctx->sig_rl);
-    SAFE_FREE(issuer_ctx);
+    EpidIssuerDelete(&issuer_ctx);
   }
 
-  return (kEpidNoErr);
+  return result;
 }
 
 // WARNING: priv_rl and sig_rl should be imported separately
@@ -324,7 +318,7 @@ EpidStatus EpidIssuerImport(GroupPubKey const* pub_key, IPrivKey const* ipriv_ke
   }
 
   do {
-    issuer_ctx->hash_alg = kSha512;
+    issuer_ctx->hash_alg = kSha256;
     // Internal representation of Epid2Params
     result = CreateEpid2Params(&issuer_ctx->epid2_params);
     BREAK_ON_EPID_ERROR(result);
@@ -344,12 +338,7 @@ EpidStatus EpidIssuerImport(GroupPubKey const* pub_key, IPrivKey const* ipriv_ke
   } while (0);
 
   if (kEpidNoErr != result) {
-    DeleteEpid2Params(&issuer_ctx->epid2_params);
-    DeleteGroupPubKey(&issuer_ctx->pub_key);
-    DeleteIssueKey(&issuer_ctx->ipriv_key);
-    SAFE_FREE(issuer_ctx->priv_rl);
-    SAFE_FREE(issuer_ctx->sig_rl);
-    SAFE_FREE(issuer_ctx);
+    EpidIssuerDelete(&issuer_ctx);
   }
 
   return (kEpidNoErr);
@@ -360,6 +349,8 @@ void EpidIssuerDelete(IssuerCtx** ctx) {
     DeleteGroupPubKey(&(*ctx)->pub_key);
     DeleteEpid2Params(&(*ctx)->epid2_params);
     DeleteIssueKey(&(*ctx)->ipriv_key);
+    SAFE_FREE((*ctx)->priv_rl);
+    SAFE_FREE((*ctx)->sig_rl);
     SAFE_FREE(*ctx);
     *ctx = NULL;
   }

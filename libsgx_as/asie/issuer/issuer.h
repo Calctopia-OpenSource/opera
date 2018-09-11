@@ -32,16 +32,6 @@
 #include "epid/common/src/sigrlvalid.h"
 
 #include "../../ascommon/as_util.h"
-// #include "revocation.h"
-
-#if !defined(htooct32l)
-#define htooct32l(u32)                                  \
-           ({{(),  \
-             ((((uint32_t)(u32)) & 0xFF0000) >> 16),     \
-             ((((uint32_t)(u32)) & 0xFF00) >> 8),       \
-             ((((uint32_t)(u32)) & 0xFF))         \
-           }})
-#endif
 
 #ifdef __cplusplus
 extern "C"{
@@ -100,7 +90,6 @@ EpidStatus RevokePriv(FpElemStr* priv, IssuerCtx* ctx);
 EpidStatus RevokeSig(EpidSignature* sig, IssuerCtx* ctx);
 
 
-// char const* EpidStatusMsg(EpidStatus e);
 #ifdef __cplusplus
 }
 #endif
