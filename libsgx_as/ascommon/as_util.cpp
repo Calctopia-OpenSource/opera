@@ -182,11 +182,11 @@ bool verif_ias_cert(
         sig_size--;
         // for (uint32_t i = 0; i < sig_size; i++) printf("%02x ", sig_begin[i]); printf("sig_size:%d\n",sig_size);
 
-        ipp_status = create_rsa_pub_key(RSA_3072_KEY_BYTES,
+        ipp_status = sgx_create_rsa_pub_key(RSA_3072_KEY_BYTES,
                            4,
-                           reinterpret_cast<const Ipp32u*>(ias_root_ca_n),
-                           reinterpret_cast<const Ipp32u*>(ias_root_ca_e),
-                           &root_ca_rsa_pub_key);
+                           reinterpret_cast<const unsigned char*>(ias_root_ca_n),
+                           reinterpret_cast<const unsigned char*>(ias_root_ca_e),
+                           reinterpret_cast<void**>(&root_ca_rsa_pub_key));
         BREAK_ON_IPP_ERROR(ipp_status)
 
         int public_key_buffer_size = 0;
@@ -229,11 +229,11 @@ bool verif_ias_cert(
         memcpy(little_endian_rsa_n, rsa_n, rsa_n_size);
         array_reverse_order(little_endian_rsa_n, rsa_n_size);
         uint8_t rsa_e[4] = {0x01, 0x00, 0x01, 0x00};
-        ipp_status = create_rsa_pub_key(rsa_n_size,
+        ipp_status = sgx_create_rsa_pub_key(rsa_n_size,
                            4,
-                           reinterpret_cast<const Ipp32u*>(little_endian_rsa_n),
-                           reinterpret_cast<const Ipp32u*>(rsa_e),
-                           cert_rsa_pub_key);
+                           reinterpret_cast<const unsigned char*>(little_endian_rsa_n),
+                           reinterpret_cast<const unsigned char*>(rsa_e),
+                           reinterpret_cast<void**>(cert_rsa_pub_key));
         BREAK_ON_IPP_ERROR(ipp_status)
 
     } while(0);

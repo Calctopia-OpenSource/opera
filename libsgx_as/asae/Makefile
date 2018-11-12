@@ -56,8 +56,6 @@ EXTERNAL_LIB += -L$(EPID_LIBDIR)/epid/member -lmember \
 
 SRC := $(wildcard *.cpp)
 SRC += pve_qe_common.cpp 			\
-       ipp_bn.cpp                   \
-	   ipp_rsa_pub_key.cpp			\
        $(LINUX_PSW_DIR)/ae/pve/cipher.cpp			\
        $(LINUX_PSW_DIR)/ae/pve/pve_rng.cpp			\
        $(LINUX_PSW_DIR)/ae/pve/helper.cpp			\
