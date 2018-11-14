@@ -544,12 +544,12 @@ EpidStatus CertifyMembership(JoinRequest const* join_request, IssuerNonce const*
 }
 
 
-size_t GetPrivRlSize(PrivRl* priv_rl) {
-  return sizeof(PrivRl) - sizeof(FpElemStr) + (priv_rl? ntohl(priv_rl->n1) : 0) * sizeof(FpElemStr);
+uint32_t GetPrivRlSize(PrivRl* priv_rl) {
+  return (uint32_t)(sizeof(PrivRl) - sizeof(FpElemStr) + (priv_rl? ntohl(priv_rl->n1) : 0) * sizeof(FpElemStr));
 }
 
-size_t GetSigRlSize(SigRl* sig_rl) {
-  return sizeof(SigRl) - sizeof(SigRlEntry) + (sig_rl? ntohl(sig_rl->n2) : 0) * sizeof(SigRlEntry);
+uint32_t GetSigRlSize(SigRl* sig_rl) {
+  return (uint32_t)(sizeof(SigRl) - sizeof(SigRlEntry) + (sig_rl? ntohl(sig_rl->n2) : 0) * sizeof(SigRlEntry));
 }
 
 EpidStatus RevokePriv(FpElemStr* priv, IssuerCtx* ctx) {

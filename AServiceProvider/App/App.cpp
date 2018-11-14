@@ -436,6 +436,7 @@ void aserviceprovider() {
             } else if (option == 2) {
                 uint8_t nonce[NONCE_SIZE] = {0};
                 ret = asie_gen_nonce(asie_eid, &enclave_ret, nonce, NONCE_SIZE);
+                BREAK_ON_ECALL(ret, "asie_gen_nonce", enclave_ret)
                 write(client_sockfd, nonce, NONCE_SIZE);
 
                 uint8_t join_request[JOIN_REQUEST_SIZE] = {0};

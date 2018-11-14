@@ -32,7 +32,7 @@ typedef struct ASQuote {
 	sgx_report_body_t 	isv_report;
 	uint8_t 			asae_ts[AS_TS_SIZE];
     uint8_t             pse_status;
-    size_t				signature_len;
+    uint32_t				signature_len;
     uint8_t             signature[];
 } ASQuote;
 
@@ -74,10 +74,10 @@ bool verify_ias_report(
     uint8_t *p_ias_crt,
     uint32_t ias_crt_size);
 
-size_t GetPrivRlSize(PrivRl* priv_rl);
-size_t GetSigRlSize(SigRl* sig_rl);
-size_t GetEpidSigSize(EpidSignature* sig);
-size_t GetASQuoteSize(ASQuote* as_quote);
+uint32_t GetPrivRlSize(PrivRl* priv_rl);
+uint32_t GetSigRlSize(SigRl* sig_rl);
+uint32_t GetEpidSigSize(EpidSignature* sig);
+uint32_t GetASQuoteSize(ASQuote* as_quote);
 
 sgx_status_t sgx_unseal_data_cur_cpusvn_only(const sgx_sealed_data_t *p_sealed_data,
         uint8_t *p_additional_MACtext,

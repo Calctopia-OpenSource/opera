@@ -396,53 +396,53 @@ bool verify_ias_report(
 }
 
 
-size_t GetPrivRlSize(PrivRl* priv_rl) {
-  const size_t kMinSize = sizeof(PrivRl) - sizeof(FpElemStr);
+uint32_t GetPrivRlSize(PrivRl* priv_rl) {
+  const uint32_t kMinSize = sizeof(PrivRl) - sizeof(FpElemStr);
   if (!priv_rl) {
     return kMinSize;
   } else {
     if (ntohl(priv_rl->n1) > (SIZE_MAX - kMinSize) / sizeof(FpElemStr)) {
       return kMinSize;
     } else {
-      return kMinSize + ntohl(priv_rl->n1) * sizeof(FpElemStr);
+      return (uint32_t)(kMinSize + ntohl(priv_rl->n1) * sizeof(FpElemStr));
     }
   }
   // return sizeof(PrivRl) - sizeof(FpElemStr) + (priv_rl? ntohl(priv_rl->n1) : 0) * sizeof(FpElemStr);
 }
 
-size_t GetSigRlSize(SigRl* sig_rl) {
-  const size_t kMinSize = sizeof(SigRl) - sizeof(SigRlEntry);
+uint32_t GetSigRlSize(SigRl* sig_rl) {
+  const uint32_t kMinSize = sizeof(SigRl) - sizeof(SigRlEntry);
   if (!sig_rl) {
     return kMinSize;
   } else {
     if (ntohl(sig_rl->n2) > (SIZE_MAX - kMinSize) / sizeof(SigRlEntry)) {
       return kMinSize;
     } else {
-      return kMinSize + ntohl(sig_rl->n2) * sizeof(SigRlEntry);
+      return (uint32_t)(kMinSize + ntohl(sig_rl->n2) * sizeof(SigRlEntry));
     }
   }
   // return sizeof(SigRl) - sizeof(SigRlEntry) + (sig_rl? ntohl(sig_rl->n2) : 0) * sizeof(SigRlEntry);
 }
 
-size_t GetEpidSigSize(EpidSignature* sig) {
-  const size_t kMinSize = sizeof(EpidSignature) - sizeof(NrProof);
+uint32_t GetEpidSigSize(EpidSignature* sig) {
+  const uint32_t kMinSize = sizeof(EpidSignature) - sizeof(NrProof);
   if (!sig) {
     return kMinSize;
   } else {
     if (ntohl(sig->n2) > (SIZE_MAX - kMinSize) / sizeof(NrProof)) {
       return kMinSize;
     } else {
-      return kMinSize + ntohl(sig->n2) * sizeof(NrProof);
+      return (uint32_t)(kMinSize + ntohl(sig->n2) * sizeof(NrProof));
     }
   }
   // return sizeof(EpidSignature) - sizeof(NrProof) + (sig ? ntohl(sig->n2) : 0) * sizeof(NrProof);
 }
 
-size_t GetASQuoteSize(ASQuote* as_quote) {
+uint32_t GetASQuoteSize(ASQuote* as_quote) {
   if (sizeof(ASQuote) + as_quote->signature_len >= SIZE_MAX) {
     return sizeof(ASQuote);
   } else {
-    return sizeof(ASQuote) + as_quote->signature_len;
+    return (uint32_t)(sizeof(ASQuote) + as_quote->signature_len);
   }
   // return sizeof(ASQuote) + as_quote->signature_len;
 }
@@ -483,8 +483,8 @@ size_t GetASQuoteSize(ASQuote* as_quote) {
 //      "the set basename is inconsistent with supplied parameters"}};
 
 // char const* EpidStatusToString(EpidStatus e) {
-//   size_t i = 0;
-//   const size_t num_entries = sizeof(kEnumToText) / sizeof(kEnumToText[0]);
+//   uint32_t i = 0;
+//   const uint32_t num_entries = sizeof(kEnumToText) / sizeof(kEnumToText[0]);
 //   for (i = 0; i < num_entries; i++) {
 //     if (e == kEnumToText[i].value) {
 //       return kEnumToText[i].text;
