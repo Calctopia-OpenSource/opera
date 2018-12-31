@@ -153,7 +153,7 @@ void print_array(uint8_t* array, uint32_t array_size, bool debug = false) {
 
 #define READ_ARRAY(fd, array, array_size)           \
     read(fd, &array_size, sizeof(array_size));      \
-    free(array);                                    \
+    if (array) free(array);                         \
     array = (uint8_t *) malloc(array_size);         \
     if (!array) {                                   \
         printf("failed to malloc\n");               \
@@ -364,8 +364,8 @@ uint32_t asp_update()
     }
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(Settings::as_host);
-    server_addr.sin_port = htons(Settings::as_port);
+    server_addr.sin_addr.s_addr = inet_addr(Settings::fe_host);
+    server_addr.sin_port = htons(Settings::fe_port);
 
     if (connect(client_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         printf("failed to connect to server\n");
@@ -376,7 +376,7 @@ uint32_t asp_update()
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     uint32_t enclave_ret = -1;
 
-    uint8_t option = 3;
+    uint8_t option = 1;
     write(client_sockfd, &option, 1);
     do {
 
@@ -398,6 +398,8 @@ uint32_t asp_update()
                            qe_quote_size);
         BREAK_ON_ECALL(ret, "sgx_get_quote", 0)
         WRITE_ARRAY(client_sockfd, qe_quote, qe_quote_size);
+        uint8_t has_pse_manifest = 1;
+        write(client_sockfd, &has_pse_manifest, 1);
         write(client_sockfd, pse_manifest, 256);
 
         READ_ARRAY(client_sockfd, ias_res, ias_res_size);

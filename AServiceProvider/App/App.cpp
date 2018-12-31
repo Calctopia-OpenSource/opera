@@ -39,7 +39,10 @@
 # define MAX_PATH FILENAME_MAX
 
 #include <sys/socket.h>
+#include <sys/un.h>
+#include <netdb.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "sgx_urts.h"
 #include "App.h"
@@ -92,7 +95,7 @@ void ocall_print_string(const char *str)
 #define SEALED_MEMBER_DATA_SIZE 952
 
 
-WebService *g_ws;
+// WebService *g_ws;
 
 sgx_target_info_t asae_target_info;
 sgx_target_info_t asie_target_info;
@@ -147,7 +150,7 @@ void print_array(uint8_t* array, uint32_t array_size, bool debug = false) {
 
 #define READ_QUOTE(fd, quote, quote_size)           \
     read(fd, &quote_size, sizeof(quote_size));      \
-    free(quote);                                    \
+    if (quote) free(quote);                         \
     quote = (sgx_quote_t *) malloc(quote_size);     \
     if (!quote) {                                   \
         printf("failed to malloc\n");               \
@@ -157,7 +160,7 @@ void print_array(uint8_t* array, uint32_t array_size, bool debug = false) {
 
 #define READ_ARRAY(fd, array, array_size)           \
     read(fd, &array_size, sizeof(array_size));      \
-    free(array);                                    \
+    if (array) free(array);                         \
     array = (uint8_t *) malloc(array_size);         \
     if (!array) {                                   \
         printf("failed to malloc\n");               \
@@ -170,8 +173,8 @@ void print_array(uint8_t* array, uint32_t array_size, bool debug = false) {
     write(fd, array, array_size);
 
 void as_init() {
-    g_ws = WebService::getInstance();
-    g_ws->init();
+    // g_ws = WebService::getInstance();
+    // g_ws->init();
 
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     uint32_t enclave_ret = -1;
@@ -196,20 +199,63 @@ void as_init() {
     } while(0);
 }
 
+uint32_t verify_ias_quote(
+    uint8_t *p_qe_quote,
+    uint8_t *p_pse_manifest = NULL)
+{
+
+    int client_sockfd = -1;
+    struct sockaddr_in server_addr;
+
+    client_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_sockfd == -1) {
+        printf("failed to create socket\n");
+        return -1;
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(Settings::fe_host);
+    server_addr.sin_port = htons(Settings::fe_port);
+
+    if (connect(client_sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+        printf("failed to connect to server\n");
+        close(client_sockfd);
+        return -1;
+    }
+
+    uint8_t option = 1;
+    write(client_sockfd, &option, 1);
+    do {
+        if (option == 1) {
+
+            WRITE_ARRAY(client_sockfd, p_qe_quote, qe_quote_size);
+            uint8_t has_pse_manifest;
+            if (p_pse_manifest == NULL) {
+                has_pse_manifest = 0;
+                write(client_sockfd, &has_pse_manifest, 1);
+            } else {
+                has_pse_manifest = 1;
+                write(client_sockfd, &has_pse_manifest, 1);
+                write(client_sockfd, p_pse_manifest, 256);
+            }
+
+            READ_ARRAY(client_sockfd, ias_res, ias_res_size);
+            READ_ARRAY(client_sockfd, ias_sig, ias_sig_size);
+            READ_ARRAY(client_sockfd, ias_crt, ias_crt_size);
+        }
+    } while (0);
+    close(client_sockfd);
+    return 0;
+}
+
 sgx_status_t get_ias_quote(
     sgx_report_t *p_report,
-    uint8_t *p_pse_manifest = NULL)
+    uint8_t *p_pse_manifest)
 {
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     uint32_t enclave_ret = -1;
     do
-    {  
-        if(ias_res) free(ias_res);
-        ias_res_size = 0;
-        if(ias_sig) free(ias_sig);
-        ias_sig_size = 0;
-        if(ias_crt) free(ias_crt);
-        ias_crt_size = 0;
+    {
 
         sgx_report_t qe_report;
         ret = sgx_get_quote(p_report,
@@ -222,21 +268,8 @@ sgx_status_t get_ias_quote(
                            qe_quote,
                            qe_quote_size);
         BREAK_ON_ECALL(ret, "sgx_get_quote", 0)
-        vector<pair<string, string>> ias_result;
 
-        g_ws->verifyQuote((uint8_t*) qe_quote, p_pse_manifest, NULL, &ias_result);
-        ias_res_size = ias_result[0].second.size();
-        ias_res = (uint8_t *)malloc(ias_res_size + 1);
-        memcpy(ias_res, ias_result[0].second.c_str(), ias_res_size);
-        ias_res[ias_res_size] = 0;
-        ias_sig_size = ias_result[1].second.size();
-        ias_sig = (uint8_t *)malloc(ias_sig_size + 1);
-        memcpy(ias_sig, ias_result[1].second.c_str(), ias_sig_size);
-        ias_sig[ias_sig_size] = 0;
-        ias_crt_size = ias_result[2].second.size();
-        ias_crt = (uint8_t *)malloc(ias_crt_size + 1);
-        memcpy(ias_crt, ias_result[2].second.c_str(), ias_crt_size);
-        ias_crt[ias_crt_size] = 0;
+        verify_ias_quote((uint8_t*) qe_quote, p_pse_manifest);
 
         ret = SGX_SUCCESS;
     } while(0);
@@ -249,29 +282,8 @@ sgx_status_t get_ias_report(
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     uint32_t enclave_ret = -1;
     do
-    {  
-        if(ias_res) free(ias_res);
-        ias_res_size = 0;
-        if(ias_sig) free(ias_sig);
-        ias_sig_size = 0;
-        if(ias_crt) free(ias_crt);
-        ias_crt_size = 0;
-
-        vector<pair<string, string>> ias_result;
-
-        g_ws->verifyQuote((uint8_t*) qe_quote, p_pse_manifest, NULL, &ias_result);
-        ias_res_size = ias_result[0].second.size();
-        ias_res = (uint8_t *)malloc(ias_res_size + 1);
-        memcpy(ias_res, ias_result[0].second.c_str(), ias_res_size);
-        ias_res[ias_res_size] = 0;
-        ias_sig_size = ias_result[1].second.size();
-        ias_sig = (uint8_t *)malloc(ias_sig_size + 1);
-        memcpy(ias_sig, ias_result[1].second.c_str(), ias_sig_size);
-        ias_sig[ias_sig_size] = 0;
-        ias_crt_size = ias_result[2].second.size();
-        ias_crt = (uint8_t *)malloc(ias_crt_size + 1);
-        memcpy(ias_crt, ias_result[2].second.c_str(), ias_crt_size);
-        ias_crt[ias_crt_size] = 0;
+    {
+        verify_ias_quote((uint8_t*) qe_quote, p_pse_manifest);
 
         ret = SGX_SUCCESS;
     } while(0);
@@ -424,6 +436,7 @@ void aserviceprovider() {
         do
         {
             if (option == 1) {
+            // get gvc
                 WRITE_ARRAY(client_sockfd, grp_verif_cert, g_cert_size);
 
                 WRITE_ARRAY(client_sockfd, gvc_ias_res, gvc_ias_res_size);
@@ -434,15 +447,19 @@ void aserviceprovider() {
                 WRITE_ARRAY(client_sockfd, sig_rl, sig_rl_size);
 
             } else if (option == 2) {
+            // provisioning protocol
                 uint8_t nonce[NONCE_SIZE] = {0};
                 ret = asie_gen_nonce(asie_eid, &enclave_ret, nonce, NONCE_SIZE);
                 BREAK_ON_ECALL(ret, "asie_gen_nonce", enclave_ret)
                 write(client_sockfd, nonce, NONCE_SIZE);
 
                 uint8_t join_request[JOIN_REQUEST_SIZE] = {0};
+                printf("read join_request\n");
                 read(client_sockfd, join_request, JOIN_REQUEST_SIZE);
 
+                printf("read qe_quote\n");
                 READ_QUOTE(client_sockfd, qe_quote, qe_quote_size);
+                printf("get_ias_report\n");
                 get_ias_report();
 
                 uint8_t member_cred[MEMBER_CRED_SIZE] = {0};
@@ -454,15 +471,6 @@ void aserviceprovider() {
                                           ias_crt, ias_crt_size);
                 BREAK_ON_ECALL(ret, "asie_certify_member", enclave_ret)
                 write(client_sockfd, member_cred, MEMBER_CRED_SIZE);
-
-            } else if (option == 3) {
-                uint8_t pse_manifest[256] = {0};
-                READ_QUOTE(client_sockfd, qe_quote, qe_quote_size);
-                read(client_sockfd, pse_manifest, 256);
-                get_ias_report(pse_manifest);
-                WRITE_ARRAY(client_sockfd, ias_res, ias_res_size);
-                WRITE_ARRAY(client_sockfd, ias_sig, ias_sig_size);
-                WRITE_ARRAY(client_sockfd, ias_crt, ias_crt_size);
 
             }
         } while(0);
