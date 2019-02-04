@@ -56,9 +56,6 @@ EXTERNAL_LIB += -L$(EPID_LIBDIR)/epid/common -lcommon \
 
 SRC := $(wildcard *.cpp)
 SRC += pve_qe_common.cpp 			\
-       $(LINUX_PSW_DIR)/ae/pve/cipher.cpp			\
-       $(LINUX_PSW_DIR)/ae/pve/pve_rng.cpp			\
-       $(LINUX_PSW_DIR)/ae/pve/helper.cpp			\
 	   ../ascommon/as_util.cpp   
 
 SRCc := $(wildcard issuer/*.c)
@@ -76,10 +73,8 @@ EPID:
 	cd $(EPID_SDK_DIR) && ./configure prefix=/usr/local
 	$(MAKE) -C $(EPID_SDK_DIR) 2> /dev/null
 
-
-
 $(SONAME): $(OBJS) EPID
-	$(CXX) $(CXXFLAGS) -o $@  $(OBJS)  -nostdlib -nodefaultlibs -nostartfiles $(LDTFLAGS) -fno-exceptions -fno-rtti $(EXTERNAL_LIB)  -lsgx_tstdcxx -lsgx_tstdc
+	$(CXX) $(CXXFLAGS) -o $@  $(OBJS)  -nostdlib -nodefaultlibs -nostartfiles $(LDTFLAGS) -fno-exceptions -fno-rtti $(EXTERNAL_LIB)  -lsgx_tcxx -lsgx_tstdc
 	$(STRIP)  --strip-unneeded $(SONAME)
 
 $(OBJ): $(AENAME)_t.c $(AENAME)_u.c

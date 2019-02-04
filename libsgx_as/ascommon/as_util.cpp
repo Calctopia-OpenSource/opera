@@ -7,7 +7,6 @@
 #include "pve_qe_common.h"
 #include "provision_msg.h"
 #include "cipher.h"
-// #include "byte_order.h"
 #include "util.h"
 #include "string.h"
 #include "sgx_quote.h"

@@ -124,8 +124,8 @@ uint32_t asae_init_member()
 
         FpElemStr *f = &g_f;
         memset(f, 0, sizeof(FpElemStr));
-        pve_status_t pve_ret = PVEC_SUCCESS;
-        if(PVEC_SUCCESS != (pve_ret=gen_epid_priv_f(f))){
+        sgx_status_t sgx_ret = SGX_SUCCESS;
+        if(SGX_SUCCESS != (sgx_ret=sgx_gen_epid_priv_f(f))){
             res = kEpidErr;
             break;
         }
