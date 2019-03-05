@@ -16,7 +16,7 @@ namespace Settings {
 	// static const char *fe_host = "192.168.1.62";
 
 
-	static string spid = "83D1AEEDDA65BD35FA4809128D84AC2F"; //SPID provided by Intel after registration for the IAS service
+	static string spid = "3CA0935F1B30E873EA3BE73CC9A5E138"; //SPID provided by Intel after registration for the IAS service
 	static const char *ias_crt = "../server.crt"; //location of the certificate send to Intel when registring for the IAS
 	static const char *ias_key = "../server.key";
 	static string ias_url = "https://test-as.sgx.trustedservices.intel.com:443/attestation/sgx/v3/";
