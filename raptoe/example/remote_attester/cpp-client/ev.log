@@ -1,0 +1,13 @@
+Logging of './epid_verifier 12344 127.0.0.1 Thisisachallengemessage' to ./ev.log
+
+Sending challenge message
+Array of size 0x2f8 malloced at 0x55bde65af350
+Array of size 0x16e malloced at 0x55bde65af650
+Array of size 0x443 malloced at 0x55bde65af7d0
+Array of size 0x158 malloced at 0x55bde65afc20
+Array of size 0xdea malloced at 0x55bde65afd80
+Array of size 0xc malloced at 0x55bde65b0b80
+Array of size 0xc malloced at 0x55bde65b0ba0
+Quote is valid
+Quote validity: 100
+Closing connection
