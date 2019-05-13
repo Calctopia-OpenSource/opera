@@ -3,26 +3,29 @@ import socket
 import sys
 import os
 import random
-from typing import NamedTuple
+# from typing import NamedTuple
+import collections
 
 ATTEST_REQUEST = 1
 INT_SIZE = 4
 QUOTE_VALIDITY_SIZE = 2
 VERBOSE = False
 
-class ValueAndSize(NamedTuple):
-    value: bytes
-    size: int
-    name: str = None
+# class ValueAndSize(NamedTuple):
+#     value: bytes
+#     size: int
+#     name: str = None
+ValueAndSize = collections.namedtuple('ValueAndSize', ['value', 'size', 'name'])
 
-class Quote(NamedTuple):
-    quote: ValueAndSize
-    grp_verif_cert: ValueAndSize
-    gvc_ias_res: ValueAndSize
-    gvc_ias_sig: ValueAndSize
-    gvc_ias_crt: ValueAndSize
-    priv_rl: ValueAndSize
-    sig_rl: ValueAndSize
+# class Quote(NamedTuple):
+#     quote: ValueAndSize
+#     grp_verif_cert: ValueAndSize
+#     gvc_ias_res: ValueAndSize
+#     gvc_ias_sig: ValueAndSize
+#     gvc_ias_crt: ValueAndSize
+#     priv_rl: ValueAndSize
+#     sig_rl: ValueAndSize
+Quote = collections.namedtuple('Quote', ['quote', 'grp_verif_cert', 'gvc_ias_res', 'gvc_ias_sig', 'gvc_ias_crt', 'priv_rl', 'sig_rl'])
 
 def net_int(net_bytes):
     return int.from_bytes(net_bytes, byteorder='little')
