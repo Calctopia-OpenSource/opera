@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">RA Droid Alpha</string>
+    <string name="IntroHeading">Welcome to RA Droid!</string>
+    <string name="Intruct1">Please enter the IP address and Port # for the desired remote attestation service.</string>
+    <string name="IPAddy">192.168.1.50</string>
+    <string name="PortNum">44444</string>
+    <string name="Conn">Connect</string>
+    <string name="Attest">Verify Quote</string>
+</resources>
